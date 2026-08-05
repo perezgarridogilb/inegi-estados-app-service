@@ -2,7 +2,10 @@
     "name": "inegi/inegi-estados-app-service",
     "type": "project",
     "description": "Servicio de estados del INEGI.",
-    "keywords": ["laravel", "framework"],
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.1",
@@ -27,7 +30,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/Helpers/KtDatatable.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

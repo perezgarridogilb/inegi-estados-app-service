@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\StateController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,3 +17,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/states/data', [StateController::class, 'getStatesData'])->name('states.data');
+Route::get('/states/data', [StateController::class, 'getStatesData'])->name('states.data');

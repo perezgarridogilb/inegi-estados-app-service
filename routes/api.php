@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\EmailController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\StateController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use MongoDB\Client;
@@ -25,6 +26,7 @@ use MongoDB\BSON\ObjectId;
 // });
 
  Route::prefix('v1')->middleware('api','jwt.verify')->group(function(){
+    Route::get('budgets', [StateController::class, 'budgetsList'])->name('budgets.list');
     Route::prefix('emails')->group(function(){
     Route::post('/', [EmailController::class,'sendOrderShippedEmail']);
     // Route::post('refresh', [AuthController::class,'refresh']);
