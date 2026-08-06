@@ -98,10 +98,18 @@ class StateController extends Controller
         return response()->json([
             'success' => true,
             'message' => "Se sincronizaron x estados.",
-            'data' => $states,
+            'data' => [
+                'datos' => $states,
+            ],
         ]);
     }
 
+    /**
+     * save function
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function save(Request $request) : JsonResponse
     {
         $count = 0;

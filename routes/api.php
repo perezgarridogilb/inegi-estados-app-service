@@ -26,9 +26,8 @@ use MongoDB\BSON\ObjectId;
 // });
 
 Route::get('states', [StateController::class, 'list'])->name('budgets.list');
-Route::post('states/save/', [StateController::class, 'save'])->name('states.save');
-Route::post('states/sync', [StateController::class, 'sync'])->name('states.sync');
 Route::post('states/save', [StateController::class, 'save'])->name('states.save');
+Route::post('states/sync', [StateController::class, 'sync'])->name('states.sync');
 //  Route::prefix('v1')->middleware('api','jwt.verify')->group(function(){
 //     Route::prefix('emails')->group(function(){
 //     Route::post('/', [EmailController::class,'sendOrderShippedEmail']);

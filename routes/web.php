@@ -19,4 +19,3 @@ Route::get('/', function () {
 });
 
 Route::get('/states/data', [StateController::class, 'getStatesData'])->name('states.data');
-Route::get('/states/data', [StateController::class, 'getStatesData'])->name('states.data');
