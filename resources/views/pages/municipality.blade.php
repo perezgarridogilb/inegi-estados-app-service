@@ -7,7 +7,7 @@
         <div class="card-header">
             <h3 class="card-title">{{ $table->title }}</h3>
             <div class="card-toolbar d-flex gap-3">
-                <button type="button" class="btn btn-primary my-3" id="btn-sync-states">
+                <button type="button" class="btn btn-primary my-3" id="btn-sync-municipalities">
                     <span class="spinner-border spinner-border-sm d-none" id="spinner-sync" role="status" aria-hidden="true"></span>
                     {{ $table->button }}
                 </button>

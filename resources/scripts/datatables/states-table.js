@@ -104,7 +104,7 @@ function renderPreviewTable(response) {
 
     data.forEach(row => {
         html += '<tr>';
-        columns.forEach(col => html += `<td>${row[col]}</td>`);
+        columns.forEach(col => html += `<td>${row[col] ?? ''}</td>`);
         html += '</tr>';
     });
 

@@ -35,19 +35,19 @@ class MunicipalityController extends Controller
     public function sync($key_state): JsonResponse
     {
         try {
-            $states = $this->inegiClient->getMunicipalities($key_state);
+            $municipalities = $this->inegiClient->getMunicipalities($key_state);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
             ], Response::HTTP_BAD_GATEWAY);
         }
-
+        $count = count(data_get($municipalities, 'datos', []));
         return response()->json([
             'success' => true,
-            'message' => "Se sincronizaron x municipios.",
+            'message' => "Se consultaron {$count} municipios.",
             'data' => [
-                'datos' => $states,
+                'datos' => $municipalities,
             ],
         ]);
     }

@@ -13,8 +13,7 @@ class MunicipalityService
     public function __construct(
         protected StatesRepository $statesRepository,
         protected MunicipalitiesRepository $municipalitiesRepository,
-    ) {
-    }
+    ) {}
 
     public function viewData(string $cve_ent): array
     {
@@ -22,12 +21,15 @@ class MunicipalityService
 
         $table = new stdClass;
         $table->title = $state ? "Municipio por estado: {$state->nomgeo}" : "Municipios";
-                $table->button = 'Sincronizar municipios en el sistema';
+        $table->button = 'Sincronizar municipios en el sistema';
         $table->list = route('municipality.list', ['cve_ent' => $state->cve_ent]);
+        $table->question = '¿Desea insertar los municipios por estado en el sistema?';
         $table->js = 'municipality-table';
         $table->name = 'municipality-table';
 
         $routes = new stdClass;
+        $routes->sync = route('municipality.sync', ['key_state' => $state->cve_ent]);
+        $routes->sync_save = null/* route('municipality.sync') */;
 
         return compact('table', 'routes', 'state');
     }
@@ -46,7 +48,7 @@ class MunicipalityService
                 'pob_total',
                 $raw_show,
             ])
-            ->when($cve_ent, fn ($query) => $query->where('cve_ent', $cve_ent))
+            ->when($cve_ent, fn($query) => $query->where('cve_ent', $cve_ent))
             ->get();
     }
 }

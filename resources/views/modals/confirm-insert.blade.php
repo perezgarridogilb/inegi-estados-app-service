@@ -6,7 +6,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                ¿Desea insertar los estados en el sistema?[1]
+                {{ $table->question }}[1]
                 <br>
                 <div style="overflow-y: auto; max-height: 300px;" class="mt-3">
                     <table id="preview_response_data" class="table table-bordered" style="text-align: center; margin: 0 auto;"></table>

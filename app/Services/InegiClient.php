@@ -13,7 +13,14 @@ class InegiClient
         $this->baseUrl = env('INEGI_STATES');
     }
 
-    public function getStates(): mixed
+    /**
+     * getStates function
+     *
+     * Gets the states of Mexico from the INEGI service.
+     *
+     * @return array
+     */
+    public function getStates(): array
     {
         $response = Http::timeout(30)->get($this->baseUrl . '/mgee/');
 
@@ -24,9 +31,17 @@ class InegiClient
         return $response->json();
     }
 
-    public function getMunicipalities(string $key_state): mixed
+    /**
+     * getMunicipalities function
+     *
+     * Gets the municipalities of a state from the INEGI service.
+     *
+     * @param string $key_state The state key
+     * @return array
+     */
+    public function getMunicipalities(string $key_state): array
     {
-        $response = Http::timeout(30)->get($this->baseUrl . '/mgee/' . $key_state);
+        $response = Http::timeout(30)->get($this->baseUrl . '/mgem/' . $key_state);
 
         if ($response->failed()) {
             throw new \Exception('No se pudo consultar el servicio de INEGI.');

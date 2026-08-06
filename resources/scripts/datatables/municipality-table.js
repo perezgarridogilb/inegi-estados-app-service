@@ -1,11 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
-    
-    $('#municipality-table').DataTable({
+    $('#states-table').DataTable({
         processing: true,
         serverSide: false,
         searching: false,
         ajax: {
-            url: $('#municipality-table').data('url'),
+            url: $('#states-table').data('url'),
             type: 'GET',
             cache: true,
             dataSrc: 'data'
@@ -105,7 +104,7 @@ function renderPreviewTable(response) {
 
     data.forEach(row => {
         html += '<tr>';
-        columns.forEach(col => html += `<td>${row[col]}</td>`);
+        columns.forEach(col => html += `<td>${row[col] ?? ''}</td>`);
         html += '</tr>';
     });
 
@@ -118,10 +117,9 @@ $('#btn-confirm-insert').on('click', function () {
     const modal = bootstrap.Modal.getInstance('#modal-confirm-insert');
     modal.hide();
     const url = document.getElementById('sync_save').value;
-    const stateId = $('#kt_datatable_search_state_url').length ? $('#kt_datatable_search_state_url').val() : null;
     console.log(url);
 
-    ERPSystem.getPetition(url, { municipalities: window.municipalities }, 'POST').then(response => {
+    ERPSystem.getPetition(url, { states: window.states }, 'POST').then(response => {
         // Desbloquear
         $btn.prop('disabled', false);
         $spinner.addClass('d-none');
@@ -138,7 +136,7 @@ $('#btn-confirm-insert').on('click', function () {
         showToast('Error al sincronizar', 'danger');
     });
 
-    $('#municipality-table').DataTable().ajax.reload();
+    $('#states-table').DataTable().ajax.reload();
     showToast('Estados insertados correctamente', 'success');
 });
 
@@ -163,7 +161,7 @@ $('#btn-sync-states').on('click', function () {
 //         _token: '{{ csrf_token() }}'
 //     }
 // }).done(function () {
-//     $('#municipality-table').DataTable().ajax.reload();
+//     $('#states-table').DataTable().ajax.reload();
 // }).fail(function () {
 //     alert('Error al sincronizar los estados');
 // }).always(function () {

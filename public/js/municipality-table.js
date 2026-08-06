@@ -19,10 +19,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     return '<a href="' + row.show_url + '" class="text-hover-primary">' + row.id + '</a>';
                 }
             },
-            { data: 'cvegeo', name: 'cvegeo', title: 'Clave geo' },
             { data: 'cve_ent', name: 'cve_ent', title: 'Clave entidad' },
             { data: 'nomgeo', name: 'nomgeo', title: 'Nombre' },
-            { data: 'nom_abrev', name: 'nom_abrev', title: 'Abreviatura' },
             { data: 'pob_total', name: 'pob_total', title: 'Población total', render: (data) => formatNumber(data) }
         ],
         info: { position: 'bottomCenter' },
@@ -49,7 +47,7 @@ function showToast(message, type = 'success') {
     bootstrap.Toast.getOrCreateInstance($toast[0]).show();
 }
 const mensajesSincronizacion = [
-    'Sincronizando estados...',
+    'Sincronizando municipios...',
     'Consultando API de INEGI...',
     'Procesando registros...'
 ];
@@ -105,7 +103,7 @@ function renderPreviewTable(response) {
 
     data.forEach(row => {
         html += '<tr>';
-        columns.forEach(col => html += `<td>${row[col]}</td>`);
+    columns.forEach(col => html += `<td>${row[col] ?? ''}</td>`);
         html += '</tr>';
     });
 
@@ -118,11 +116,10 @@ $('#btn-confirm-insert').on('click', function () {
     const modal = bootstrap.Modal.getInstance('#modal-confirm-insert');
     modal.hide();
     const url = document.getElementById('sync_save').value;
-    const stateId = $('#kt_datatable_search_state').length ? $('#kt_datatable_search_state').val() : null;
+    const stateId = $('#kt_datatable_search_state_url').length ? $('#kt_datatable_search_state_url').val() : null;
     console.log(url);
 
-    ERPSystem.getPetition(url, { states: window.states }, 'POST').then(response => {
-        // Desbloquear
+    ERPSystem.getPetition(url, { municipalities: window.municipalities }, 'POST').then(response => {
         $btn.prop('disabled', false);
         $spinner.addClass('d-none');
         showToast('Consulta completada', 'success');
@@ -139,7 +136,7 @@ $('#btn-confirm-insert').on('click', function () {
     });
 
     $('#municipality-table').DataTable().ajax.reload();
-    showToast('Estados insertados correctamente', 'success');
+    showToast('municipios insertados correctamente', 'success');
 });
 
 $('#modal-confirm-insert').on('hidden.bs.modal', function () {
@@ -149,25 +146,10 @@ $('#modal-confirm-insert').on('hidden.bs.modal', function () {
     $(this).data('confirmed', false);
 });
 
-$('#btn-sync-states').on('click', function () {
+$('#btn-sync-municipalities').on('click', function () {
     const $btn = $(this);
     const $spinner = $btn.find('.spinner-border'); // O el selector que use tu spinner dentro/junto al botón
 
     ejecutarAccion($spinner, $btn);
 });
-
-// $.ajax({
-//     url: '/api/states/sync',
-//     type: 'POST',
-//     data: {
-//         _token: '{{ csrf_token() }}'
-//     }
-// }).done(function () {
-//     $('#municipality-table').DataTable().ajax.reload();
-// }).fail(function () {
-//     alert('Error al sincronizar los estados');
-// }).always(function () {
-//     $spinner.addClass('d-none');
-//     $btn.prop('disabled', false);
-// });
 
