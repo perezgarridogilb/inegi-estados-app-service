@@ -19,6 +19,7 @@ class StateResource extends JsonResource
             'pob_femenina' => $this->pob_femenina,
             'pob_masculina' => $this->pob_masculina,
             'total_viviendas_habitadas' => $this->total_viviendas_habitadas,
+            'show_url' => $this->show_url
         ];
     }
 }

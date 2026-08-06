@@ -30,7 +30,6 @@ return new class extends Migration
 
             $table->timestamps();
 
-            // Llave foránea que referencia a la clave del estado (cve_ent)
             $table->foreign('cve_ent')
                 ->references('cve_ent')
                 ->on('states')

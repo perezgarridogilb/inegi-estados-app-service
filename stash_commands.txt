@@ -1,0 +1,10 @@
+Comandos relacionados al stash (stash@{0}: "On master: 6ago", sha aa3ea41):
+
+1. git stash list
+2. git log --oneline -5; echo "---STASH---"; git stash show --name-only -p stash@{0} | grep -i stateservice; echo "---SHA---"; git rev-parse stash@{0}
+3. git cat-file -t 714ca08; echo "---"; git rev-list --all | grep -i 714ca08; echo "---STASHLIST---"; git stash list; echo "---FILES---"; git stash show --name-only stash@{0} | grep -i state
+4. git show 714ca08:app/Services/StateService.php | head -60; echo "===CURRENT==="; cat app/Services/StateService.php
+5. git checkout 714ca08 -- app/Services/StateService.php && cat app/Services/StateService.php | head -3
+
+Resultado: 714ca08 es un commit (no un stash). El stash@{0} NO contiene app/Services/StateService.php;
+StateService.php se extrajo del commit 714ca08 via git checkout.

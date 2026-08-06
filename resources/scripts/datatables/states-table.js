@@ -10,11 +10,19 @@ document.addEventListener('DOMContentLoaded', function () {
             dataSrc: 'data'
         },
         columns: [
+            {
+                data: 'id',
+                name: 'id',
+                title: 'ID',
+                render: function (data, type, row) {
+                    return '<a href="' + row.show_url + '" class="text-hover-primary">' + row.id + '</a>';
+                }
+            },
             { data: 'cvegeo', name: 'cvegeo', title: 'Clave geo' },
             { data: 'cve_ent', name: 'cve_ent', title: 'Clave entidad' },
             { data: 'nomgeo', name: 'nomgeo', title: 'Nombre' },
             { data: 'nom_abrev', name: 'nom_abrev', title: 'Abreviatura' },
-            { data: 'pob_total', name: 'pob_total', title: 'Población total' }
+            { data: 'pob_total', name: 'pob_total', title: 'Población total', render: (data) => formatNumber(data) }
         ],
         info: { position: 'bottomCenter' },
         language: {
@@ -26,6 +34,11 @@ document.addEventListener('DOMContentLoaded', function () {
 /* Listener */
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+function formatNumber(value) {
+    if (value === null || value === undefined || value === '') return '';
+    return Number(value).toLocaleString('es-MX');
+}
 
 function showToast(message, type = 'success') {
     const $toast = $('#app-toast');
@@ -53,8 +66,7 @@ async function ejecutarAccion($spinner, $btn) {
         showToast(mensajesSincronizacion[index], 'info');
     }, 1000);
 
-    const url = document.getElementById('sync_save').value;
-    console.log(url);
+    const url = document.getElementById('sync').value;
 
     ERPSystem.getPetition(url, { states: null }, 'POST').then(response => {
         clearInterval(intervalId);
@@ -104,8 +116,26 @@ $('#btn-confirm-insert').on('click', function () {
     $('#modal-confirm-insert').data('confirmed', true);
     const modal = bootstrap.Modal.getInstance('#modal-confirm-insert');
     modal.hide();
+    const url = document.getElementById('sync_save').value;
+    console.log(url);
 
-    // insertar
+    ERPSystem.getPetition(url, { states: window.states }, 'POST').then(response => {
+        // Desbloquear
+        $btn.prop('disabled', false);
+        $spinner.addClass('d-none');
+        showToast('Consulta completada', 'success');
+
+        // confirmar o cancelar
+        const modal = new bootstrap.Modal('#modal-confirm-insert');
+        modal.show();
+        renderPreviewTable(window.states);
+
+    }).catch(error => {
+        $btn.prop('disabled', false);
+        $spinner.addClass('d-none');
+        showToast('Error al sincronizar', 'danger');
+    });
+
     $('#states-table').DataTable().ajax.reload();
     showToast('Estados insertados correctamente', 'success');
 });

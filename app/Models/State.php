@@ -24,4 +24,9 @@ class State extends Model
         'pob_masculina',
         'total_viviendas_habitadas',
     ];
+
+    public function municipality()
+    {
+        return $this->hasMany(Municipality::class, 'cve_ent', 'cve_ent');
+    }
 }

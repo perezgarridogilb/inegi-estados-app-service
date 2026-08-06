@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\EmailController;
+use App\Http\Controllers\Api\V1\MunicipalityController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\AuthController;
@@ -25,9 +26,10 @@ use MongoDB\BSON\ObjectId;
 //     return $request->user();
 // });
 
-Route::get('states', [StateController::class, 'list'])->name('budgets.list');
+Route::get('states', [StateController::class, 'list'])->name('states.list');
 Route::post('states/save', [StateController::class, 'save'])->name('states.save');
 Route::post('states/sync', [StateController::class, 'sync'])->name('states.sync');
+Route::get('municipality/{cve_ent?}', [MunicipalityController::class, 'list'])->name('municipality.list');
 //  Route::prefix('v1')->middleware('api','jwt.verify')->group(function(){
 //     Route::prefix('emails')->group(function(){
 //     Route::post('/', [EmailController::class,'sendOrderShippedEmail']);

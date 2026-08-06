@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\StateResource;
 use App\Models\State;
 use App\Services\InegiClient;
+use App\Services\StateService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use stdClass;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,9 +17,10 @@ use Symfony\Component\HttpFoundation\Response;
 class StateController extends Controller
 {
     public function __construct(
+        protected StateService $stateService,
+
         protected InegiClient $inegiClient,
-    ) {
-    }
+    ) {}
 
     /**
      * getStatesData function
@@ -26,27 +29,18 @@ class StateController extends Controller
      */
     public function getStatesData(): View
     {
-        $table = new stdClass;
-        $table->filters = tableSearch(['clients']);
-        $table->list = route('budgets.list'); // o 'budgets.list' según corresponda
-        $table->js = 'states-table';
-        $table->name = 'states-table';
-
-        $routes = new stdClass;
-        $routes->sync_save = route('states.save');
-        $routes->sync_save = route('states.sync');
-
-        return view('states', compact('table', 'routes'));
+        return view('pages.states', $this->stateService->viewData());
     }
 
-    public function list(Request $request) : JsonResponse
+    public function list(Request $request): JsonResponse
     {
         if ($request->has('draw')) {
             $filters = datatableFilters($request);
             $data = $this->setUpQuery();
             return response()->json(createDatatable($data->query, $filters, $data->total, 'Listado', intval($filters->length)), 200);
         }
-
+        $show_url = route('municipality.show') . '/';
+        $raw_show = DB::raw('CONCAT("' . $show_url . '", states.id) AS show_url');
         $states = State::select([
             'id',
             'cvegeo',
@@ -57,6 +51,7 @@ class StateController extends Controller
             'pob_femenina',
             'pob_masculina',
             'total_viviendas_habitadas',
+            $raw_show
         ])->get();
 
         return response()->json([
@@ -66,7 +61,7 @@ class StateController extends Controller
         ]);
     }
 
-    public function sync() : JsonResponse
+    public function sync(): JsonResponse
     {
         try {
             $states = $this->inegiClient->getStates();
@@ -76,24 +71,6 @@ class StateController extends Controller
                 'message' => $e->getMessage(),
             ], Response::HTTP_BAD_GATEWAY);
         }
-
-        // $count = 0;
-
-        // foreach ($states as $state) {
-        //     State::updateOrCreate(
-        //         ['cve_ent' => $state['cve_ent']],
-        //         [
-        //             'cvegeo' => $state['cvegeo'],
-        //             'nomgeo' => $state['nomgeo'],
-        //             'nom_abrev' => $state['nom_abrev'] ?? null,
-        //             'pob_total' => (int) $state['pob_total'],
-        //             'pob_femenina' => (int) $state['pob_femenina'],
-        //             'pob_masculina' => (int) $state['pob_masculina'],
-        //             'total_viviendas_habitadas' => (int) $state['total_viviendas_habitadas'],
-        //         ]
-        //     );
-        //     $count++;
-        // }
 
         return response()->json([
             'success' => true,
@@ -110,7 +87,7 @@ class StateController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function save(Request $request) : JsonResponse
+    public function save(Request $request): JsonResponse
     {
         $count = 0;
 
@@ -139,6 +116,8 @@ class StateController extends Controller
 
     public function setUpQuery()
     {
+        $show_url = route('municipality.show') . '/';
+        $raw_show = DB::raw('CONCAT("' . $show_url . '", states.id) AS show_url');        
         $query = State::select([
             'id',
             'cvegeo',
@@ -149,6 +128,7 @@ class StateController extends Controller
             'pob_femenina',
             'pob_masculina',
             'total_viviendas_habitadas',
+            $raw_show
         ]);
 
         $data = (object)[];

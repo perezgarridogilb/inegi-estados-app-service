@@ -1,6 +1,6 @@
 <x-base-layout title="Estados">
     <input type="hidden" name="sync_save" id="sync_save" value="{{ @$routes->sync_save }}">
-    <input type="hidden" name="sync" id="sync" value="{{ @$routes->sync_save }}">
+    <input type="hidden" name="sync" id="sync" value="{{ @$routes->sync }}">
 
     <div class="card">          {{-- contenedor blanco, borde redondeado, sombra --}}
         <div class="card-header">           {{-- barra superior --}}
