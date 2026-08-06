@@ -39,6 +39,8 @@ if (!function_exists('datatableFilters')) {
         $filters->draw = $request['draw'];
         $filters->start = $request['start'];
         $filters->length = $request['length'];
+        $filters->column = null;
+        $filters->sort = null;
 
         if ($order):
             $filters->column = $columns[$order[0]['column']]['name'];

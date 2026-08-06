@@ -4964,7 +4964,7 @@
 		}
 	
 		div.children().append(
-			settings.oLanguage.sLengthMenu.replace( '_MENU_', select[0].outerHTML )
+			settings.oLanguage.sLengthMenu.replace( '_MENU_','<br>'+ select[0].outerHTML + '<br>' )
 		);
 	
 		// Can't use `select` variable as user might provide their own and the
