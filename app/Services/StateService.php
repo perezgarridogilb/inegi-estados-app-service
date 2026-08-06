@@ -22,6 +22,8 @@ class StateService
     {
         $table = new stdClass;
         $table->list = route('states.list');
+        $table->title = 'Estados';
+        $table->button = 'Sincronizar estados en el sistema';
         $table->js = 'states-table';
         $table->name = 'states-table';
 

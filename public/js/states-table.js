@@ -13,13 +13,13 @@ document.addEventListener('DOMContentLoaded', function () {
             {
                 data: 'id',
                 name: 'id',
-                title: 'ID',
-                render: function (data, type, row) {
-                    return '<a href="' + row.show_url + '" class="text-hover-primary">' + row.id + '</a>';
-                }
+                title: 'ID'
             },
+            { data: 'cve_ent', name: 'cve_ent', title: 'Clave entidad',
+                render: function (data, type, row) {
+                    return '<a href="' + row.show_url + '" class="text-hover-primary">' + row.cve_ent + '</a>';
+                } },
             { data: 'cvegeo', name: 'cvegeo', title: 'Clave geo' },
-            { data: 'cve_ent', name: 'cve_ent', title: 'Clave entidad' },
             { data: 'nomgeo', name: 'nomgeo', title: 'Nombre' },
             { data: 'nom_abrev', name: 'nom_abrev', title: 'Abreviatura' },
             { data: 'pob_total', name: 'pob_total', title: 'Población total', render: (data) => formatNumber(data) }

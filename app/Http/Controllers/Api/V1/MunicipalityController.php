@@ -4,48 +4,51 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MunicipalityResource;
-use App\Models\Municipality;
-use App\Models\State;
+use App\Services\InegiClient;
+use App\Services\MunicipalityService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use stdClass;
+use Symfony\Component\HttpFoundation\Response;
 
 class MunicipalityController extends Controller
 {
-    public function show(State $state)
+    public function __construct(
+        protected MunicipalityService $municipalityService,
+        protected InegiClient $inegiClient,
+    ) {}
+
+    public function show($cve_ent)
     {
-        $table = new stdClass;
-        $table->list = route('municipality.list', ['supplierCode' => $state->cve_ent]);
-        $table->js = 'municipality-table';
-        $table->name = 'municipality-table';
-
-        $routes = new stdClass;
-        // $routes->sync_save = route('states.save');
-        // $routes->sync = route('states.sync');
-
-        return view('pages.municipality', compact('table', 'routes', 'state'));
+        return view('pages.municipality', $this->municipalityService->viewData($cve_ent));
     }
 
-    public function list(Request $request)
+    public function list($cve_ent)
     {
-        $show_url = route('municipality.show') . '/';
-        // $raw_show = DB::raw('CONCAT("' . $show_url . '", states.id) AS show_url');
-        $raw_show = DB::raw("CONCAT('{$show_url}', municipalities.id) AS show_url");
-        $municipalities = Municipality::select([
-            'id',
-            'cve_ent',
-            'cve_mun',
-            'nomgeo',
-            'pob_total',
-            $raw_show,
-        ])
-            ->when($request->filled('cve_ent'), fn ($query) => $query->where('cve_ent', $request->cve_ent))
-            ->get();
+        $municipalities = $this->municipalityService->listData($cve_ent);
 
         return response()->json([
             'data' => MunicipalityResource::collection($municipalities),
             'recordsTotal' => $municipalities->count(),
             'recordsFiltered' => $municipalities->count(),
+        ]);
+    }
+    public function sync($key_state): JsonResponse
+    {
+        try {
+            $states = $this->inegiClient->getMunicipalities($key_state);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], Response::HTTP_BAD_GATEWAY);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Se sincronizaron x municipios.",
+            'data' => [
+                'datos' => $states,
+            ],
         ]);
     }
 }

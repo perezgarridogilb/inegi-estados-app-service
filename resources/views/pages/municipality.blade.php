@@ -5,13 +5,13 @@
 
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Estados</h3>
+            <h3 class="card-title">{{ $table->title }}</h3>
             <div class="card-toolbar d-flex gap-3">
-                <button type="button" class="btn btn-primary mb-3" id="btn-sync-states">
+                <button type="button" class="btn btn-primary my-3" id="btn-sync-states">
                     <span class="spinner-border spinner-border-sm d-none" id="spinner-sync" role="status" aria-hidden="true"></span>
-                    Sincronizar estados en el sistema
+                    {{ $table->button }}
                 </button>
-                <button type="button" class="btn btn-danger mb-3" id="btn-clear-states">
+                <button type="button" class="btn btn-danger my-3" id="btn-clear-states">
                     Limpiar base
                 </button>
             </div>
@@ -48,8 +48,8 @@
     @endpush
 
     @push('scripts')
-        <script>window.states = [];</script>
+        <script>window.municipalities = [];</script>
         <script src="{{ asset('js/factory.js') }}"></script>
-        <script src="{{ asset('js/states-table.js') }}"></script>
+        <script src="{{ asset("js/{$table->js}.js") }}"></script>
     @endpush
 </x-base-layout>

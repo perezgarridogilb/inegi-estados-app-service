@@ -118,9 +118,10 @@ $('#btn-confirm-insert').on('click', function () {
     const modal = bootstrap.Modal.getInstance('#modal-confirm-insert');
     modal.hide();
     const url = document.getElementById('sync_save').value;
+    const stateId = $('#kt_datatable_search_state_url').length ? $('#kt_datatable_search_state_url').val() : null;
     console.log(url);
 
-    ERPSystem.getPetition(url, { states: window.states }, 'POST').then(response => {
+    ERPSystem.getPetition(url, { municipalities: window.municipalities }, 'POST').then(response => {
         // Desbloquear
         $btn.prop('disabled', false);
         $spinner.addClass('d-none');

@@ -40,7 +40,7 @@ class StateController extends Controller
             return response()->json(createDatatable($data->query, $filters, $data->total, 'Listado', intval($filters->length)), 200);
         }
         $show_url = route('municipality.show') . '/';
-        $raw_show = DB::raw('CONCAT("' . $show_url . '", states.id) AS show_url');
+        $raw_show = DB::raw('CONCAT("' . $show_url . '", states.cve_ent) AS show_url');
         $states = State::select([
             'id',
             'cvegeo',
@@ -117,7 +117,7 @@ class StateController extends Controller
     public function setUpQuery()
     {
         $show_url = route('municipality.show') . '/';
-        $raw_show = DB::raw('CONCAT("' . $show_url . '", states.id) AS show_url');        
+        $raw_show = DB::raw('CONCAT("' . $show_url . '", states.cve_ent) AS show_url');        
         $query = State::select([
             'id',
             'cvegeo',

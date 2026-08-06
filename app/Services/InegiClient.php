@@ -23,4 +23,15 @@ class InegiClient
 
         return $response->json();
     }
+
+    public function getMunicipalities(string $key_state): mixed
+    {
+        $response = Http::timeout(30)->get($this->baseUrl . '/mgee/' . $key_state);
+
+        if ($response->failed()) {
+            throw new \Exception('No se pudo consultar el servicio de INEGI.');
+        }
+
+        return $response->json();
+    }
 }
