@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     $('#states-table').DataTable({
         processing: true,
         serverSide: false,
+        searching: false,
         ajax: {
             url: $('#states-table').data('url'),
             type: 'GET',
@@ -9,11 +10,11 @@ document.addEventListener('DOMContentLoaded', function () {
             dataSrc: 'data'
         },
         columns: [
-            { data: 'cvegeo', name: 'cvegeo' },
-            { data: 'cve_ent', name: 'cve_ent' },
-            { data: 'nomgeo', name: 'nomgeo' },
-            { data: 'nom_abrev', name: 'nom_abrev' },
-            { data: 'pob_total', name: 'pob_total' }
+            { data: 'cvegeo', name: 'cvegeo', title: 'Clave geo' },
+            { data: 'cve_ent', name: 'cve_ent', title: 'Clave entidad' },
+            { data: 'nomgeo', name: 'nomgeo', title: 'Nombre' },
+            { data: 'nom_abrev', name: 'nom_abrev', title: 'Abreviatura' },
+            { data: 'pob_total', name: 'pob_total', title: 'Población total' }
         ],
         info: { position: 'bottomCenter' },
         language: {
@@ -60,18 +61,43 @@ async function ejecutarAccion($spinner, $btn) {
         // Desbloquear
         $btn.prop('disabled', false);
         $spinner.addClass('d-none');
-        let data = response.data.datos;
-        showToast('Sincronización completada', 'success');
+        window.states = response.data.datos;
+        showToast('Consulta completada', 'success');
 
         // confirmar o cancelar
         const modal = new bootstrap.Modal('#modal-confirm-insert');
         modal.show();
+                renderPreviewTable(window.states);
+
     }).catch(error => {
         clearInterval(intervalId);
         $btn.prop('disabled', false);
         $spinner.addClass('d-none');
         showToast('Error al sincronizar', 'danger');
     });
+}
+
+function renderPreviewTable(response) {
+    let data = response.datos;
+    const $table = $('#preview_response_data');
+    if (!data || !data.length) {
+        $table.html('<tr><td>Sin datos</td></tr>');
+        return;
+    }
+
+    const columns = Object.keys(data[0]);
+    let html = '<thead><tr>';
+    columns.forEach(col => html += `<th>${col}</th>`);
+    html += '</tr></thead><tbody>';
+
+    data.forEach(row => {
+        html += '<tr>';
+        columns.forEach(col => html += `<td>${row[col]}</td>`);
+        html += '</tr>';
+    });
+
+    html += '</tbody>';
+    $table.html(html);
 }
 
 $('#btn-confirm-insert').on('click', function () {
@@ -97,7 +123,6 @@ $('#btn-sync-states').on('click', function () {
 
     ejecutarAccion($spinner, $btn);
 });
-
 
 // $.ajax({
 //     url: '/api/states/sync',
