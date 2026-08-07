@@ -113,6 +113,7 @@ function renderPreviewTable(response) {
 }
 
 $('#btn-confirm-insert').on('click', function () {
+    const $btn = $(this);
     $('#modal-confirm-insert').data('confirmed', true);
     const modal = bootstrap.Modal.getInstance('#modal-confirm-insert');
     modal.hide();

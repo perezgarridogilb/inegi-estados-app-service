@@ -46,6 +46,7 @@
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
     </script>
     <script src="{{ asset('plugins/custom/datatables/datatables.bundle.js') }}"></script>
+    <script src="{{ asset('plugins/custom/sweetalert2/sweetalert2.min.js') }}"></script>
 
     <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080;">
         <div id="app-toast" class="toast align-items-center text-bg-success" role="alert" aria-live="assertive" aria-atomic="true">

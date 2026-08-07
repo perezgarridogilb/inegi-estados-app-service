@@ -416,8 +416,8 @@ function getStrAfterChar(str, char = '=')
 
 jQuery(document).ready(function () {
 
-if ($(".daterangepicker").length) $(".daterangepicker").daterangepicker();
-
+    $(".daterangepicker").length
+        $(".daterangepicker").daterangepicker();
 
     $('.automatic-submit').submit(function( event ) {
         event.preventDefault();

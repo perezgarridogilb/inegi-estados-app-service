@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\MunicipalitySaveRequest;
 use App\Http\Resources\MunicipalityResource;
+use App\Models\Municipality;
 use App\Services\InegiClient;
 use App\Services\MunicipalityService;
 use Illuminate\Http\JsonResponse;
@@ -50,5 +52,39 @@ class MunicipalityController extends Controller
                 'datos' => $municipalities,
             ],
         ]);
+    }
+
+        /**
+     * save function
+     *
+     * @param MunicipalitySaveRequest $request
+     * @return JsonResponse
+     */
+    public function save(MunicipalitySaveRequest $request): JsonResponse
+    {
+        $count = $this->municipalityService->save($request->input('municipalities'));
+
+        return response()->json([
+            'success' => true,
+            'message' => "Se guardaron {$count} municipios.",
+            'count' => $count,
+        ]);
+    }
+
+    public function delete(?string $cve_ent): JsonResponse
+    {
+        $count = $this->municipalityService->delete($cve_ent);
+
+        if ($count) {
+            return response()->json([
+                'success' => true,
+                'message' => "Se eliminaron {$count} municipios.",
+            ], Response::HTTP_OK);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'No se encontraron municipios para eliminar.',
+        ], Response::HTTP_NOT_FOUND);
     }
 }

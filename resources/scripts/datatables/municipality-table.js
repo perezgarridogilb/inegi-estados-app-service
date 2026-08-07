@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
-    $('#states-table').DataTable({
+    $('#municipality-table').DataTable({
         processing: true,
         serverSide: false,
         searching: false,
         ajax: {
-            url: $('#states-table').data('url'),
+            url: $('#municipality-table').data('url'),
             type: 'GET',
             cache: true,
             dataSrc: 'data'
@@ -13,15 +13,10 @@ document.addEventListener('DOMContentLoaded', function () {
             {
                 data: 'id',
                 name: 'id',
-                title: 'ID',
-                render: function (data, type, row) {
-                    return '<a href="' + row.show_url + '" class="text-hover-primary">' + row.id + '</a>';
-                }
+                title: 'ID'
             },
-            { data: 'cvegeo', name: 'cvegeo', title: 'Clave geo' },
             { data: 'cve_ent', name: 'cve_ent', title: 'Clave entidad' },
             { data: 'nomgeo', name: 'nomgeo', title: 'Nombre' },
-            { data: 'nom_abrev', name: 'nom_abrev', title: 'Abreviatura' },
             { data: 'pob_total', name: 'pob_total', title: 'Población total', render: (data) => formatNumber(data) }
         ],
         info: { position: 'bottomCenter' },
@@ -48,7 +43,7 @@ function showToast(message, type = 'success') {
     bootstrap.Toast.getOrCreateInstance($toast[0]).show();
 }
 const mensajesSincronizacion = [
-    'Sincronizando estados...',
+    'Sincronizando municipios...',
     'Consultando API de INEGI...',
     'Procesando registros...'
 ];
@@ -73,13 +68,13 @@ async function ejecutarAccion($spinner, $btn) {
         // Desbloquear
         $btn.prop('disabled', false);
         $spinner.addClass('d-none');
-        window.states = response.data.datos;
+        window.municipalities = response.data.datos;
         showToast('Consulta completada', 'success');
 
         // confirmar o cancelar
         const modal = new bootstrap.Modal('#modal-confirm-insert');
         modal.show();
-        renderPreviewTable(window.states);
+        renderPreviewTable(window.municipalities);
 
     }).catch(error => {
         clearInterval(intervalId);
@@ -119,8 +114,7 @@ $('#btn-confirm-insert').on('click', function () {
     const url = document.getElementById('sync_save').value;
     console.log(url);
 
-    ERPSystem.getPetition(url, { states: window.states }, 'POST').then(response => {
-        // Desbloquear
+    ERPSystem.getPetition(url, { municipalities: window.municipalities.datos }, 'POST').then(response => {
         $btn.prop('disabled', false);
         $spinner.addClass('d-none');
         showToast('Consulta completada', 'success');
@@ -128,7 +122,7 @@ $('#btn-confirm-insert').on('click', function () {
         // confirmar o cancelar
         const modal = new bootstrap.Modal('#modal-confirm-insert');
         modal.show();
-        renderPreviewTable(window.states);
+        renderPreviewTable(window.municipalities);
 
     }).catch(error => {
         $btn.prop('disabled', false);
@@ -136,8 +130,8 @@ $('#btn-confirm-insert').on('click', function () {
         showToast('Error al sincronizar', 'danger');
     });
 
-    $('#states-table').DataTable().ajax.reload();
-    showToast('Estados insertados correctamente', 'success');
+    $('#municipality-table').DataTable().ajax.reload();
+    showToast('Municipios insertados correctamente', 'success');
 });
 
 $('#modal-confirm-insert').on('hidden.bs.modal', function () {
@@ -147,25 +141,39 @@ $('#modal-confirm-insert').on('hidden.bs.modal', function () {
     $(this).data('confirmed', false);
 });
 
-$('#btn-sync-states').on('click', function () {
+$('#btn-sync-municipalities').on('click', function () {
     const $btn = $(this);
     const $spinner = $btn.find('.spinner-border'); // O el selector que use tu spinner dentro/junto al botón
 
     ejecutarAccion($spinner, $btn);
 });
 
-// $.ajax({
-//     url: '/api/states/sync',
-//     type: 'POST',
-//     data: {
-//         _token: '{{ csrf_token() }}'
-//     }
-// }).done(function () {
-//     $('#states-table').DataTable().ajax.reload();
-// }).fail(function () {
-//     alert('Error al sincronizar los estados');
-// }).always(function () {
-//     $spinner.addClass('d-none');
-//     $btn.prop('disabled', false);
-// });
+$(document).on('click', '#btn-clear-states', function (e) {
+    e.preventDefault();
 
+    Swal.fire({
+        title: '¿Limpiar registros asociados a este municipio?',
+        text: 'Se eliminarán los registros asociados a este estado.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, limpiar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const url = document.getElementById('delete').value;
+
+            ERPSystem.getPetition(url,{}, 'POST').then(response => {
+                // disb
+                // $btn.prop('disabled', false);
+                // $spinner.addClass('d-none');
+                    $('#municipality-table').DataTable().ajax.reload();
+
+                showToast('Completado', 'success');
+
+            }).catch(error => {
+                // $spinner.addClass('d-none');
+                showToast('Error', 'danger');
+            });
+        }
+    });
+});

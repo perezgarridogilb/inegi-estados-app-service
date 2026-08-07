@@ -33,6 +33,7 @@ Route::post('states/sync', [StateController::class, 'sync'])->name('states.sync'
 Route::get('municipality/{cve_ent?}', [MunicipalityController::class, 'list'])->name('municipality.list');
 Route::post('municipality/sync/{key_state?}', [MunicipalityController::class, 'sync'])->name('municipality.sync');
 Route::post('municipality/save', [MunicipalityController::class, 'save'])->name('municipality.save');
+Route::post('municipality/delete/{cve_ent?}', [MunicipalityController::class, 'delete'])->name('municipality.delete');
 //  Route::prefix('v1')->middleware('api','jwt.verify')->group(function(){
 //     Route::prefix('emails')->group(function(){
 //     Route::post('/', [EmailController::class,'sendOrderShippedEmail']);

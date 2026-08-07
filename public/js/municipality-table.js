@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function () {
-    
     $('#municipality-table').DataTable({
         processing: true,
         serverSide: false,
@@ -14,10 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
             {
                 data: 'id',
                 name: 'id',
-                title: 'ID',
-                render: function (data, type, row) {
-                    return '<a href="' + row.show_url + '" class="text-hover-primary">' + row.id + '</a>';
-                }
+                title: 'ID'
             },
             { data: 'cve_ent', name: 'cve_ent', title: 'Clave entidad' },
             { data: 'nomgeo', name: 'nomgeo', title: 'Nombre' },
@@ -72,13 +68,13 @@ async function ejecutarAccion($spinner, $btn) {
         // Desbloquear
         $btn.prop('disabled', false);
         $spinner.addClass('d-none');
-        window.states = response.data.datos;
+        window.municipalities = response.data.datos;
         showToast('Consulta completada', 'success');
 
         // confirmar o cancelar
         const modal = new bootstrap.Modal('#modal-confirm-insert');
         modal.show();
-        renderPreviewTable(window.states);
+        renderPreviewTable(window.municipalities);
 
     }).catch(error => {
         clearInterval(intervalId);
@@ -103,7 +99,7 @@ function renderPreviewTable(response) {
 
     data.forEach(row => {
         html += '<tr>';
-    columns.forEach(col => html += `<td>${row[col] ?? ''}</td>`);
+        columns.forEach(col => html += `<td>${row[col] ?? ''}</td>`);
         html += '</tr>';
     });
 
@@ -116,10 +112,9 @@ $('#btn-confirm-insert').on('click', function () {
     const modal = bootstrap.Modal.getInstance('#modal-confirm-insert');
     modal.hide();
     const url = document.getElementById('sync_save').value;
-    const stateId = $('#kt_datatable_search_state_url').length ? $('#kt_datatable_search_state_url').val() : null;
     console.log(url);
 
-    ERPSystem.getPetition(url, { municipalities: window.municipalities }, 'POST').then(response => {
+    ERPSystem.getPetition(url, { municipalities: window.municipalities.datos }, 'POST').then(response => {
         $btn.prop('disabled', false);
         $spinner.addClass('d-none');
         showToast('Consulta completada', 'success');
@@ -127,7 +122,7 @@ $('#btn-confirm-insert').on('click', function () {
         // confirmar o cancelar
         const modal = new bootstrap.Modal('#modal-confirm-insert');
         modal.show();
-        renderPreviewTable(window.states);
+        renderPreviewTable(window.municipalities);
 
     }).catch(error => {
         $btn.prop('disabled', false);
@@ -136,7 +131,7 @@ $('#btn-confirm-insert').on('click', function () {
     });
 
     $('#municipality-table').DataTable().ajax.reload();
-    showToast('municipios insertados correctamente', 'success');
+    showToast('Municipios insertados correctamente', 'success');
 });
 
 $('#modal-confirm-insert').on('hidden.bs.modal', function () {
@@ -151,5 +146,35 @@ $('#btn-sync-municipalities').on('click', function () {
     const $spinner = $btn.find('.spinner-border'); // O el selector que use tu spinner dentro/junto al botón
 
     ejecutarAccion($spinner, $btn);
+});
+
+$(document).on('click', '#btn-clear-states', function (e) {
+    e.preventDefault();
+
+    Swal.fire({
+        title: '¿Limpiar registros asociados a este municipio?',
+        text: 'Se eliminarán los registros asociados a este estado.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, limpiar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const url = document.getElementById('delete').value;
+
+            ERPSystem.getPetition(url,{}, 'POST').then(response => {
+                // disb
+                // $btn.prop('disabled', false);
+                // $spinner.addClass('d-none');
+                    $('#municipality-table').DataTable().ajax.reload();
+
+                showToast('Completado', 'success');
+
+            }).catch(error => {
+                // $spinner.addClass('d-none');
+                showToast('Error', 'danger');
+            });
+        }
+    });
 });
 
