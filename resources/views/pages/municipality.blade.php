@@ -23,13 +23,14 @@
 {{--             <div class="col-md-3">
                 <input type="text" id="kt_datatable_search" class="form-control" placeholder="Buscar..." />
             </div> --}}
+            <div class="table-responsive">
             <!--end::Search-->
             <table id="{{ isset($table->name) ? $table->name : $table->js }}" data-url="{{ $table->list }}"
                 class="table align-middle table-row-dashed fs-6 gy-5 datatable">
                 <tbody class="text-gray-600 fw-semibold">
                 </tbody>
             </table>
-        </div>
+        </div></div>
     </div>
 
     {{-- <div class="modal fade" id="modal-confirm-insert" tabindex="-1" aria-labelledby="modalConfirmInsertLabel" aria-hidden="true">

@@ -24,11 +24,13 @@
                 <input type="text" id="kt_datatable_search" class="form-control" placeholder="Buscar..." />
             </div> --}}
             <!--end::Search-->
+            <div class="table-responsive">
             <table id="{{ isset($table->name) ? $table->name : $table->js }}" data-url="{{ $table->list }}"
                 class="table align-middle table-row-dashed fs-6 gy-5 datatable">
                 <tbody class="text-gray-600 fw-semibold">
                 </tbody>
             </table>
+        </div>
         </div>
     </div>
 

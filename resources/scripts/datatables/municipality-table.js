@@ -102,15 +102,43 @@ function renderPreviewTable(response) {
     columns.forEach(col => html += `<th>${col}</th>`);
     html += '</tr></thead><tbody>';
 
-    data.forEach(row => {
-        html += '<tr>';
+    data.forEach((row, index) => {
+        const hiddenClass = index >= 7 ? 'd-none extra-row' : '';
+        
+        html += `<tr class="${hiddenClass}">`;
         columns.forEach(col => html += `<td>${row[col] ?? ''}</td>`);
         html += '</tr>';
     });
 
+    if (data.length > 7) {
+        const remaining = data.length - 7;
+        html += `
+            <tr id="row-toggle-more">
+                <td colspan="${columns.length}" class="text-center py-2">
+                    <button type="button" class="btn btn-sm btn-link text-primary fw-bold" id="btn-show-more">
+                        Ver más (${remaining} restantes)
+                    </button>
+                </td>
+            </tr>
+        `;
+    }
+
     html += '</tbody>';
     $table.html(html);
 }
+
+$(document).on('click', '#btn-show-more', function () {
+    const $btn = $(this);
+    const $extraRows = $('#preview_response_data .extra-row');
+
+    if ($extraRows.hasClass('d-none')) {
+        $extraRows.removeClass('d-none');
+        $btn.text('Ver menos');
+    } else {
+        $extraRows.addClass('d-none');
+        $btn.text(`Ver más (${$extraRows.length} restantes)`);
+    }
+});
 
 $('#btn-confirm-insert').on('click', function () {
     $('#modal-confirm-insert').data('confirmed', true);

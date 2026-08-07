@@ -15,10 +15,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 
-Route::get('states', [StateController::class, 'getStatesData'])->name('states.data');
+Route::get('/', [StateController::class, 'getStatesData'])->name('states.data');
 Route::get('states/show/{id?}', [MunicipalityController::class, 'show'])->name('municipality.show');
 
