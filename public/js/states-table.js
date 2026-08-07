@@ -159,28 +159,30 @@ $('#btn-confirm-insert').on('click', function () {
     const $btn = $(this);
     $('#modal-confirm-insert').data('confirmed', true);
     const modal = bootstrap.Modal.getInstance('#modal-confirm-insert');
+
     modal.hide();
     const url = document.getElementById('sync_save').value;
     console.log(url);
 
     ERPSystem.getPetition(url, { states: window.states }, 'POST').then(response => {
         // Desbloquear
-        $btn.prop('disabled', false);
-        $spinner.addClass('d-none');
+        // $btn.prop('disabled', false);
         showToast('Consulta completada', 'success');
 
-        // confirmar o cancelar
-        const modal = new bootstrap.Modal('#modal-confirm-insert');
-        modal.show();
-        renderPreviewTable(window.states);
+        // // confirmar o cancelar
+        // const modal = new bootstrap.Modal('#modal-confirm-insert');
+        setTimeout(function () { location.reload(); }, 1001);
+
+        // modal.show();
+        // renderPreviewTable(window.states);
 
     }).catch(error => {
-        $btn.prop('disabled', false);
-        $spinner.addClass('d-none');
+        
+        // $btn.prop('disabled', false);
         showToast('Error al sincronizar', 'danger');
     });
 
-    $('#states-table').DataTable().ajax.reload();
+    // $('#states-table').DataTable().ajax.reload();
     showToast('Estados insertados correctamente', 'success');
 });
 

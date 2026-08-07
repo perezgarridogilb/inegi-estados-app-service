@@ -34,11 +34,6 @@ class StateController extends Controller
 
     public function list(Request $request): JsonResponse
     {
-        if ($request->has('draw')) {
-            $filters = datatableFilters($request);
-            $data = $this->setUpQuery();
-            return response()->json(createDatatable($data->query, $filters, $data->total, 'Listado', intval($filters->length)), 200);
-        }
         $show_url = route('municipality.show') . '/';
         $raw_show = DB::raw('CONCAT("' . $show_url . '", states.cve_ent) AS show_url');
         $states = State::select([
@@ -134,6 +129,6 @@ class StateController extends Controller
         return response()->json([
             'success' => false,
             'message' => "No se encuentra el estado: {$cve_ent}.",
-        ], Response::HTTP_NOT_FOUND);
+        ], Response::HTTP_NO_CONTENT);
     }
 }

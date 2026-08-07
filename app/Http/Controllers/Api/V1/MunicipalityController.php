@@ -90,6 +90,6 @@ class MunicipalityController extends Controller
         return response()->json([
             'success' => false,
             'message' => 'No se encontraron municipios para eliminar.',
-        ], Response::HTTP_NOT_FOUND);
+        ], Response::HTTP_NO_CONTENT);
     }
 }
