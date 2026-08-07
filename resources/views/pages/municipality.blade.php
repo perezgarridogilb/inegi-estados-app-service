@@ -18,7 +18,12 @@
                 </button>
             </div>
         </div>
-        <div class="card-body"> {{-- contenido, fondo blanco heredado --}}
+        <div class="card-body">
+            <!--begin::Search-->
+            <div class="col-md-3">
+                <input type="text" id="kt_datatable_search" class="form-control" placeholder="Buscar..." />
+            </div>
+            <!--end::Search-->
             <table id="{{ isset($table->name) ? $table->name : $table->js }}" data-url="{{ $table->list }}"
                 class="table align-middle table-row-dashed fs-6 gy-5 datatable">
                 <tbody class="text-gray-600 fw-semibold">

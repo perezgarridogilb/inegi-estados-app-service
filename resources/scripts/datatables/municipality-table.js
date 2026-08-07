@@ -143,7 +143,7 @@ $('#modal-confirm-insert').on('hidden.bs.modal', function () {
 
 $('#btn-sync-municipalities').on('click', function () {
     const $btn = $(this);
-    const $spinner = $btn.find('.spinner-border'); // O el selector que use tu spinner dentro/junto al botón
+    const $spinner = $btn.find('.spinner-border'); 
 
     ejecutarAccion($spinner, $btn);
 });
@@ -162,11 +162,11 @@ $(document).on('click', '#btn-clear-states', function (e) {
         if (result.isConfirmed) {
             const url = document.getElementById('delete').value;
 
-            ERPSystem.getPetition(url,{}, 'POST').then(response => {
+            ERPSystem.getPetition(url, {}, 'POST').then(response => {
                 // disb
                 // $btn.prop('disabled', false);
                 // $spinner.addClass('d-none');
-                    $('#municipality-table').DataTable().ajax.reload();
+                $('#municipality-table').DataTable().ajax.reload();
 
                 showToast('Completado', 'success');
 
@@ -177,3 +177,4 @@ $(document).on('click', '#btn-clear-states', function (e) {
         }
     });
 });
+

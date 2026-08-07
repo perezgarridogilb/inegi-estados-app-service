@@ -71,14 +71,14 @@ class StateController extends Controller
                 'message' => $e->getMessage(),
             ], Response::HTTP_BAD_GATEWAY);
         }
-
+        $count = count(data_get($states, 'datos', []));
         return response()->json([
             'success' => true,
-            'message' => "Se sincronizaron x estados.",
+            'message' => "Se consultaron {$count} estados.",
             'data' => [
                 'datos' => $states,
             ],
-        ]);
+        ], Response::HTTP_OK);
     }
 
     /**
@@ -89,29 +89,12 @@ class StateController extends Controller
      */
     public function save(Request $request): JsonResponse
     {
-        $count = 0;
-
-        foreach ($this->inegiClient->getStates() as $state) {
-            State::updateOrCreate(
-                ['cve_ent' => $state['cve_ent']],
-                [
-                    'cvegeo' => $state['cvegeo'],
-                    'nomgeo' => $state['nomgeo'],
-                    'nom_abrev' => $state['nom_abrev'] ?? null,
-                    'pob_total' => (int) $state['pob_total'],
-                    'pob_femenina' => (int) $state['pob_femenina'],
-                    'pob_masculina' => (int) $state['pob_masculina'],
-                    'total_viviendas_habitadas' => (int) $state['total_viviendas_habitadas'],
-                ]
-            );
-            $count++;
-        }
+        $count = $this->stateService->save($request->input('states.datos'));
 
         return response()->json([
             'success' => true,
-            'message' => "Se guardaron {$count} estados.",
-            'count' => $count,
-        ]);
+            'message' => "Se guardaron {$count} estados."
+        ], Response::HTTP_OK);
     }
 
     public function setUpQuery()
@@ -135,5 +118,22 @@ class StateController extends Controller
         $data->query = $query;
         $data->total = $query->count();
         return $data;
+    }
+
+        public function delete(?string $cve_ent): JsonResponse
+    {
+        $count = $this->stateService->delete($cve_ent);
+
+        if ($count) {
+            return response()->json([
+                'success' => true,
+                'message' => "Se eliminó el estado.",
+            ], Response::HTTP_OK);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => "No se encuentra el estado: {$cve_ent}.",
+        ], Response::HTTP_NOT_FOUND);
     }
 }

@@ -36,7 +36,7 @@ return new class extends Migration
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
 
-            // Índice único compuesto para garantizar idempotencia y evitar duplicados por estado/municipio
+            // idempotencia y evitar duplicados por estado/municipio
             $table->unique(['cve_ent', 'cve_mun'], 'uk_estado_municipio');
         });
     }

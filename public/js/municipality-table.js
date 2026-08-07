@@ -162,11 +162,11 @@ $(document).on('click', '#btn-clear-states', function (e) {
         if (result.isConfirmed) {
             const url = document.getElementById('delete').value;
 
-            ERPSystem.getPetition(url,{}, 'POST').then(response => {
+            ERPSystem.getPetition(url, {}, 'POST').then(response => {
                 // disb
                 // $btn.prop('disabled', false);
                 // $spinner.addClass('d-none');
-                    $('#municipality-table').DataTable().ajax.reload();
+                $('#municipality-table').DataTable().ajax.reload();
 
                 showToast('Completado', 'success');
 

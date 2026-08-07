@@ -30,4 +30,11 @@ class State extends Model
     {
         return $this->hasMany(Municipality::class, 'cve_ent', 'cve_ent');
     }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (State $state) {
+            $state->municipality()->delete();
+        });
+    }
 }

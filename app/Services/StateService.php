@@ -3,6 +3,9 @@
 namespace App\Services;
 
 use App\Repositories\StatesRepository;
+use Exception;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use stdClass;
 
 class StateService
@@ -10,8 +13,7 @@ class StateService
     public function __construct(
         protected InegiClient $inegiClient,
         protected StatesRepository $statesRepository,
-    ) {
-    }
+    ) {}
 
     public function sync(): array
     {
@@ -31,6 +33,7 @@ class StateService
         $routes = new stdClass;
         $routes->sync_save = route('states.save');
         $routes->sync = route('states.sync');
+        $routes->delete = route('states.delete');
 
         return compact('table', 'routes');
     }
@@ -40,25 +43,37 @@ class StateService
         $count = 0;
 
         foreach ($states as $state) {
-            $this->statesRepository->updateOrCreate(
-                ['cve_ent' => $state['cve_ent']],
-                [
-                    'cvegeo' => $state['cvegeo'],
-                    'nomgeo' => $state['nomgeo'],
-                    'nom_abrev' => $state['nom_abrev'] ?? null,
-                    'pob_total' => (int) $state['pob_total'],
-                    'pob_femenina' => (int) $state['pob_femenina'],
-                    'pob_masculina' => (int) $state['pob_masculina'],
-                    'total_viviendas_habitadas' => (int) $state['total_viviendas_habitadas'],
-                ]
-            );
-            $count++;
+            try {
+                DB::beginTransaction();
+                $state = $this->statesRepository->query()
+                    ->withTrashed()
+                    ->updateOrCreate(
+                        ['cve_ent' => $state['cve_ent']], // unique from ddl
+                        [
+                            'cvegeo' => $state['cvegeo'],
+                            'nomgeo' => $state['nomgeo'],
+                            'nom_abrev' => $state['nom_abrev'] ?? null,
+                            'pob_total' => (int) $state['pob_total']
+                        ]
+                    );
+
+                if ($state->trashed()) {
+                    $state->restore(); // reset from softdeletes
+                }
+
+                $count++;
+                DB::commit();
+            } catch (Exception $e) {
+                DB::rollBack();
+                Log::error(self::class . "@save: {$e->getMessage()}");
+                continue;
+            }
         }
 
         return $count;
     }
 
-    public function query(): object
+    public function query(): stdClass
     {
         $query = $this->statesRepository->query()->select([
             'id',
@@ -66,15 +81,19 @@ class StateService
             'cve_ent',
             'nomgeo',
             'nom_abrev',
-            'pob_total',
-            'pob_femenina',
-            'pob_masculina',
-            'total_viviendas_habitadas',
+            'pob_total'
         ]);
 
-        $data = (object)[];
+        $data = new stdClass;
         $data->query = $query;
         $data->total = $query->count();
         return $data;
+    }
+
+    public function delete(): int
+    {
+        return $this->statesRepository->query()
+            // ->where('cve_ent', $cve_ent)
+            ->all()->each->delete();
     }
 }
