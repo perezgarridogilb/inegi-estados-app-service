@@ -1,7 +1,7 @@
 <x-base-layout title="Estados">
     <input type="hidden" name="sync_save" id="sync_save" value="{{ @$routes->sync_save }}">
     <input type="hidden" name="sync" id="sync" value="{{ @$routes->sync }}">
-    {{-- <input type="hidden" name="sync" id="sync" value="{{ @$routes->sync }}"> --}}
+    <input type="hidden" name="delete" id="delete" value="{{ @$routes->delete }}">
 
     <div class="card">
         <div class="card-header">

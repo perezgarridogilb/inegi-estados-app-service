@@ -120,14 +120,14 @@ class StateController extends Controller
         return $data;
     }
 
-        public function delete(?string $cve_ent): JsonResponse
+        public function delete(string $cve_ent = null): JsonResponse
     {
-        $count = $this->stateService->delete($cve_ent);
+        $count = $this->stateService->delete();
 
         if ($count) {
             return response()->json([
                 'success' => true,
-                'message' => "Se eliminó el estado.",
+                'message' => "Estados eliminados: {$count}",
             ], Response::HTTP_OK);
         }
 

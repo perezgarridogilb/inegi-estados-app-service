@@ -13,13 +13,15 @@ document.addEventListener('DOMContentLoaded', function () {
             {
                 data: 'id',
                 name: 'id',
-                title: 'ID',
-                render: function (data, type, row) {
-                    return '<a href="' + row.show_url + '" class="text-hover-primary">' + row.id + '</a>';
-                }
+                title: 'ID'
             },
             { data: 'cvegeo', name: 'cvegeo', title: 'Clave geo' },
-            { data: 'cve_ent', name: 'cve_ent', title: 'Clave entidad' },
+            {
+                data: 'cve_ent', name: 'cve_ent', title: 'Clave entidad',
+                render: function (data, type, row) {
+                    return '<a href="' + row.show_url + '" class="text-hover-primary">' + row.cve_ent + '</a>';
+                }
+            },
             { data: 'nomgeo', name: 'nomgeo', title: 'Nombre' },
             { data: 'nom_abrev', name: 'nom_abrev', title: 'Abreviatura' },
             { data: 'pob_total', name: 'pob_total', title: 'Población total', render: (data) => formatNumber(data) }
@@ -30,6 +32,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+var handleSearchDatatable = function () {
+    $('#kt_datatable_search').on('keyup', function (e) {
+        if (e.key === 'Enter' || e.keyCode === 13) {
+            data.search.value = e.target.value;
+            dt.search(e.target.value).draw();
+        }
+    });
+}
 
 /* Listener */
 
@@ -113,6 +124,7 @@ function renderPreviewTable(response) {
 }
 
 $('#btn-confirm-insert').on('click', function () {
+    const $btn = $(this);
     $('#modal-confirm-insert').data('confirmed', true);
     const modal = bootstrap.Modal.getInstance('#modal-confirm-insert');
     modal.hide();
@@ -154,18 +166,32 @@ $('#btn-sync-states').on('click', function () {
     ejecutarAccion($spinner, $btn);
 });
 
-// $.ajax({
-//     url: '/api/states/sync',
-//     type: 'POST',
-//     data: {
-//         _token: '{{ csrf_token() }}'
-//     }
-// }).done(function () {
-//     $('#states-table').DataTable().ajax.reload();
-// }).fail(function () {
-//     alert('Error al sincronizar los estados');
-// }).always(function () {
-//     $spinner.addClass('d-none');
-//     $btn.prop('disabled', false);
-// });
+$(document).on('click', '#btn-clear-states', function (e) {
+    e.preventDefault();
+
+    Swal.fire({
+        title: '¿Limpiar el sistema?',
+        text: 'Se eliminarán los registros de estados y sus municipios asociados.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, limpiar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const url = document.getElementById('delete').value;
+
+            ERPSystem.getPetition(url, {}, 'POST').then(response => {
+                // disb
+                // $btn.prop('disabled', false);
+                // $spinner.addClass('d-none');
+
+                showToast('Completado', 'success');
+                location.reload();
+            }).catch(error => {
+                // $spinner.addClass('d-none');
+                showToast('Error', 'danger');
+            });
+        }
+    });
+});
 

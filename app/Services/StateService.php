@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\State;
 use App\Repositories\StatesRepository;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -92,8 +93,13 @@ class StateService
 
     public function delete(): int
     {
-        return $this->statesRepository->query()
-            // ->where('cve_ent', $cve_ent)
-            ->all()->each->delete();
+        $states = $this->statesRepository->query()->get();
+        $count = count($states);
+
+        $states->each(function (State $state) {
+            $state->delete();
+        });
+
+        return $count;
     }
 }

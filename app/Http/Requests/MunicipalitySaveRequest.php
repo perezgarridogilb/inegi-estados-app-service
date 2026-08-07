@@ -11,6 +11,20 @@ class MunicipalitySaveRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('municipalities') && is_string($this->municipalities)) {
+            $decoded = json_decode($this->municipalities, true);
+
+            // Reemplace
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $this->merge([
+                    'municipalities' => $decoded,
+                ]);
+            }
+        }
+    }
+
     public function rules(): array
     {
         return [

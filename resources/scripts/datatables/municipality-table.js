@@ -114,7 +114,7 @@ $('#btn-confirm-insert').on('click', function () {
     const url = document.getElementById('sync_save').value;
     console.log(url);
 
-    ERPSystem.getPetition(url, { municipalities: window.municipalities.datos }, 'POST').then(response => {
+    ERPSystem.getPetition(url, { municipalities: JSON.stringify(window.municipalities.datos) }, 'POST').then(response => {
         $btn.prop('disabled', false);
         $spinner.addClass('d-none');
         showToast('Consulta completada', 'success');
@@ -143,7 +143,7 @@ $('#modal-confirm-insert').on('hidden.bs.modal', function () {
 
 $('#btn-sync-municipalities').on('click', function () {
     const $btn = $(this);
-    const $spinner = $btn.find('.spinner-border'); 
+    const $spinner = $btn.find('.spinner-border'); // O el selector que use tu spinner dentro/junto al botón
 
     ejecutarAccion($spinner, $btn);
 });
@@ -166,10 +166,10 @@ $(document).on('click', '#btn-clear-states', function (e) {
                 // disb
                 // $btn.prop('disabled', false);
                 // $spinner.addClass('d-none');
-                $('#municipality-table').DataTable().ajax.reload();
+                // $('#municipality-table').DataTable().ajax.reload();
 
                 showToast('Completado', 'success');
-
+                location.reload();
             }).catch(error => {
                 // $spinner.addClass('d-none');
                 showToast('Error', 'danger');

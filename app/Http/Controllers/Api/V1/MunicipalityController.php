@@ -62,6 +62,11 @@ class MunicipalityController extends Controller
      */
     public function save(MunicipalitySaveRequest $request): JsonResponse
     {
+        foreach ($request->input('municipalities') as $index => $municipality) {
+    if (empty($municipality['cve_ent']) || empty($municipality['nomgeo'])) {
+        dd($index, $municipality);
+    }
+}
         $count = $this->municipalityService->save($request->input('municipalities'));
 
         return response()->json([
