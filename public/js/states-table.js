@@ -2,7 +2,11 @@ document.addEventListener('DOMContentLoaded', function () {
     $('#states-table').DataTable({
         processing: true,
         serverSide: false,
-        searching: false,
+        searching: true, 
+        dom: '<"d-flex justify-content-start mb-3"f>rtip',
+        search: {
+            search: ''
+        },
         ajax: {
             url: $('#states-table').data('url'),
             type: 'GET',

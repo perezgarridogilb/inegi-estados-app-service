@@ -3,6 +3,11 @@ document.addEventListener('DOMContentLoaded', function () {
         processing: true,
         serverSide: false,
         searching: false,
+        searching: true, 
+        dom: '<"d-flex justify-content-start mb-3"f>rtip',
+        search: {
+            search: ''
+        },
         ajax: {
             url: $('#municipality-table').data('url'),
             type: 'GET',
@@ -54,7 +59,7 @@ async function ejecutarAccion($spinner, $btn) {
     let index = 0;
     showToast(mensajesSincronizacion[index], 'info');
 
-    // 2. Alternar texto cada 1000ms (1 segundo)
+    // by 1000ms (1 seg)
     const intervalId = setInterval(() => {
         index = (index + 1) % mensajesSincronizacion.length;
 
@@ -65,13 +70,13 @@ async function ejecutarAccion($spinner, $btn) {
 
     ERPSystem.getPetition(url, { states: null }, 'POST').then(response => {
         clearInterval(intervalId);
-        // Desbloquear
+        // disb
         $btn.prop('disabled', false);
         $spinner.addClass('d-none');
         window.municipalities = response.data.datos;
         showToast('Consulta completada', 'success');
 
-        // confirmar o cancelar
+        // confirm or cancel
         const modal = new bootstrap.Modal('#modal-confirm-insert');
         modal.show();
         renderPreviewTable(window.municipalities);

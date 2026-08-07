@@ -95,7 +95,7 @@ class MunicipalityService
                         ],
                         [
                             'nomgeo' => $municipality['nomgeo'],
-                            'pob_total' => (int) $municipality['pob_total'],
+                            'pob_total' => isset($municipality['pob_total']) ? (int) $municipality['pob_total'] : null,
                         ]
                     );
 
