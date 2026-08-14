@@ -36,7 +36,7 @@ trait XmlTrait
         string $quantity,
         string $valUnit
     ): string {
-        return bcmul($quantity, $valUnit, 2);
+        return bcmul($quantity, $valUnit, 4);
     }
 
     /** (IVA trasladado)
@@ -73,6 +73,26 @@ public function calculateSubtotalFromDataGeneral(
         return $this->numberFormat2Dec(...$subtotal);
     }
 
+    /**
+     * @see Guía de llenado CFDI - Estándar de comprobante fiscal digital
+     * @link https://www.sat.gob.mx/minisitio/Factura/documentos/Guia_llenadoCFDI_DPA.pdf#page=24
+     *
+     * */
+    public function calculateTaxesAndAmount(
+        array $concepts,
+    ): array {
+        $base = [];
+        $totalTrasladados = [];
+
+        foreach ($concepts as $concept) {
+            $base[] = $concept->importe;
+            $totalTrasladados[] = $concept->traslados->importe;
+        }
+        return [
+            $this->numberFormat2Dec(...$base),
+            $this->numberFormat2Dec(...$totalTrasladados)
+        ];
+    }
     /**
      * @see Guía de llenado CFDI - Estándar de comprobante fiscal digital
      * @link https://www.sat.gob.mx/minisitio/Factura/documentos/Guia_llenadoCFDI_DPA.pdf#page=8

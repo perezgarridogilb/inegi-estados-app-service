@@ -12,14 +12,17 @@ use Cfdi\XmlBuilder;
  *
  * CFDI XML and writes it to disk.
  *
- * @param array $argv Command line arguments
+ * @param array|null $argv Command line arguments
  * @return int Exit code
  */
-function main(array $argv): int
+function main(?array $argv): int
 {
-    $options = getopt("", ["path:"], $restIndex);
-
-    $path = $options['path'] ?? null;
+    if (PHP_SAPI === 'cli') {
+        $options = getopt("", ["path:"], $restIndex);
+        $path = $options['path'] ?? null;
+    } else {
+        $path = $_GET['path'] ?? null;
+    }
 
     if (!$path) {
         echo "Error: El parámetro --path es obligatorio.\n";
@@ -41,7 +44,8 @@ function main(array $argv): int
         ->buildDatosGenerales()
         ->buildEmisor()
         ->buildReceptor()
-        ->buildConceptos();
+        ->buildConceptos()
+        ->buildImpuestosComprobante();
 
     $filePath = __DIR__ . '/cfdi_generado.xml';
     if (file_put_contents($filePath, $xml->getXml()) !== false) {
@@ -65,4 +69,4 @@ function main(array $argv): int
     return 1;
 }
 
-exit(main($argv));
+exit(main($argv ?? null));
