@@ -98,9 +98,17 @@ trait XmlTrait
      */
     public function calculateTotalFromDataGeneral(
         string $importe,
-        string $tasaOCuota
+        array $concepts
     ): string {
-        return bcmul($importe, bcadd($tasaOCuota, "1", 6), 2);
+        $iva = (function ($items) {
+            $resultado = [];
+            foreach ($items as $c) {
+                $resultado[] = $c->iva;
+            }
+            return $resultado;
+        })($concepts);
+        $promedio = bcdiv($this->numberFormat2Dec(...$iva), (string) count($iva), 6);
+        return bcmul($importe, bcadd($promedio, "1", 6), 2);
     }
 
     /**
