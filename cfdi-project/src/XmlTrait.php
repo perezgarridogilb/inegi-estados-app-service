@@ -6,7 +6,7 @@ trait XmlTrait
 {
     protected function currencyByCode(string $code): ?array
     {
-        $currencies = require __DIR__ . '/../config/cat_currencies.php';
+        $currencies = require __DIR__ . '/config/cat_currencies.php';
 
         foreach ($currencies as $currency) {
             if ($currency['code'] === $code) {
@@ -51,7 +51,7 @@ trait XmlTrait
         string $base,
         string $tasaOCuota
     ): string {
-        return bcmul($base, $tasaOCuota, 2);
+        return bcmul($base, $tasaOCuota, 4);
     }
 
     /**

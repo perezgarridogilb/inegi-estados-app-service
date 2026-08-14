@@ -8,8 +8,7 @@ use stdClass;
 
 class XmlBuilder
 {
-    use XmlTrait
-;
+    use XmlTrait;
 
     protected DOMDocument $doc;
     protected DOMElement $comprobante;
@@ -63,14 +62,16 @@ class XmlBuilder
         $this->comprobante->setAttribute('FormaPago', $this->data->comprobante->formaPago ?? '01');
         $currency = $this->currencyByCode($this->data->comprobante->moneda);
         $this->comprobante->setAttribute('Moneda', $currency['code'] ?? 'MXN');
-        
         // $this->comprobante->setAttribute('TipoCambio', (string) ($this->data->tipoCambio ?? '1'));
         $this->comprobante->setAttribute('TipoDeComprobante', $this->data->comprobante->tipoDeComprobante ?? 'I');
         $this->comprobante->setAttribute('LugarExpedicion', $this->data->comprobante->lugarExpedicion ?? '');
         $this->comprobante->setAttribute('Exportacion', '01');        
-        $this->comprobante->setAttribute('Descuento', $this->data->comprobante->exportacion ?? '01');        
-        $this->comprobante->setAttribute('SubTotal', (string) ($this->data->comprobante->subtotal ?? '0'));
-        $this->comprobante->setAttribute('Total', (string) ($this->data->comprobante->total ?? '0'));
+        $this->comprobante->setAttribute('Descuento', '0.00');        
+        $this->comprobante->setAttribute('SubTotal', $this->data->comprobante->subtotal ?? '0.00');
+        $this->comprobante->setAttribute('Total', $this->data->comprobante->total ?? '0.00');
+        $this->comprobante->setAttribute('NoCertificado', '');
+        $this->comprobante->setAttribute('Certificado', '');
+        $this->comprobante->setAttribute('Sello', '');
 
         return $this;
     }
@@ -122,25 +123,50 @@ class XmlBuilder
             $node->setAttribute('Cantidad', ($concepto->cantidad ?? '1'));
             $node->setAttribute('ClaveUnidad', $concepto->claveUnidad ?? 'ACT');
             $node->setAttribute('Descripcion', $concepto->descripcion ?? '');
-            $node->setAttribute('ValorUnitario', ($concepto->valorUnitario ?? '0'));
-            $node->setAttribute('Importe', $concepto->sutotal ?? '0');
-
+            $node->setAttribute('ValorUnitario', ($concepto->valorUnitario ?? '0.00'));
+            $node->setAttribute('Importe', $concepto->sutotal ?? '0.00');
             $node->setAttribute('ObjetoImp', (string) ($concepto->objetoImp ?? '02'));
-            // $node->setAttribute('NoIdentificacion', (string) ($concepto->importe ?? '0'));
-            $node->setAttribute('Descuento', '0');
+            // $node->setAttribute('NoIdentificacion', (string) ($concepto->importe ?? '0.00'));
+            $node->setAttribute('Descuento', '0.00');
 
-            $hasTraslados = $concepto->objetoImp === '02' ? true : false;
-            // $hasRetenciones = null;
-
-            if ($hasTraslados) {
+            if (in_array($concepto->objetoImp, ['02'])) {
                 $this->buildImpuestosConcepto($node, $concepto);
             }
             $this->conceptosNode->appendChild($node);
         }
-
-
+        $this->buildImpuestosComprobante();
 
         return $this;
+    }
+
+    /**
+     * Agrega el nodo <cfdi:Impuestos> a nivel Comprobante con el
+     * TotalImpuestosTrasladados y el Traslado de IVA agregado.
+     */
+    protected function buildImpuestosComprobante(): void
+    {
+        $totalTrasladados = '0.00';
+        $base = '0.00';
+
+        foreach ($this->data->conceptos as $concepto) {
+            $base = bcadd($base, (string) $concepto->importe, 2);
+            $totalTrasladados = bcadd($totalTrasladados, (string) ($concepto->traslados->importe ?? '0.00'), 2);
+        }
+
+        $impuestosNode = $this->doc->createElement('cfdi:Impuestos');
+        $impuestosNode->setAttribute('TotalImpuestosTrasladados', $totalTrasladados);
+        $trasladosNode = $this->doc->createElement('cfdi:Traslados');
+
+        $node = $this->doc->createElement('cfdi:Traslado');
+        $node->setAttribute('Base', $base);
+        $node->setAttribute('Impuesto', '002');
+        $node->setAttribute('TipoFactor', 'Tasa');
+        $node->setAttribute('TasaOCuota', self::TASA_O_QUOTA);
+        $node->setAttribute('Importe', $totalTrasladados);
+
+        $trasladosNode->appendChild($node);
+        $impuestosNode->appendChild($trasladosNode);
+        $this->comprobante->appendChild($impuestosNode);
     }
 
     /**
@@ -148,10 +174,9 @@ class XmlBuilder
      */
     protected function buildImpuestosConcepto(DOMElement $conceptoNode, object $concepto): void
     {
-
         // if ($hasTraslados) {
         $concepto->traslados = new stdClass();
-        $concepto->traslados->importe = $this->calculateTrasladoImporteFromBase((string) $concepto->importe, self::TASA_O_QUOTA);
+        $concepto->traslados->importe = $this->numberFormat2Dec($this->calculateTrasladoImporteFromBase((string) $concepto->importe, self::TASA_O_QUOTA));
 
         $impuestosNode = $this->doc->createElement('cfdi:Impuestos');
         $trasladosNode = $this->doc->createElement('cfdi:Traslados');
@@ -162,16 +187,12 @@ class XmlBuilder
         $node->setAttribute('TipoFactor', 'Tasa');
 
         /**
-         * Solo "02" = Sí objeto de impuesto obliga a desglosar Traslados/Retenciones.
-         *
-         * @see Guía de llenado CFDI - Documento relacionado con vales de despensa (SAT)
          * @link https://www.sat.gob.mx/minisitio/Factura/documentos/Guia_llenadoCFDI_DPA.pdf#page=21
          */
         $node->setAttribute('TasaOCuota', self::TASA_O_QUOTA);
         $node->setAttribute('Importe', $concepto->traslados->importe);
         $trasladosNode->appendChild($node);
         $impuestosNode->appendChild($trasladosNode);
-
         $conceptoNode->appendChild($impuestosNode);
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/vendor/autoload.php';
 
+use Cfdi\Services\CfdiXsdValidator;
 use Cfdi\XmlBuilder;
 
 /**
@@ -45,6 +46,18 @@ function main(array $argv): int
     $filePath = __DIR__ . '/cfdi_generado.xml';
     if (file_put_contents($filePath, $xml->getXml()) !== false) {
         echo "Archivo XML guardado exitosamente en: {$filePath}\n";
+
+        $validator = new CfdiXsdValidator();
+        $result = $validator->validate($xml->getXml(), 'https://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd');
+
+        if ($result['valid']) {
+            echo "Validación XSD: OK\n";
+        } else {
+            echo "Validación XSD: FALLÓ\n";
+            foreach ($result['errors'] as $error) {
+                echo "  - {$error}\n";
+            }
+        }
         return 0;
     }
 

@@ -21,8 +21,9 @@ class ComposerStaticInit14c6f8c11102074df3f328657843a832
     );
 
     public static $classMap = array (
-        'Cfdi\\XmlTrait' => __DIR__ . '/../..' . '/src/XmlTrait.php',
+        'Cfdi\\Services\\CfdiXsdValidator' => __DIR__ . '/../..' . '/src/Services/CfdiXsdValidator.php',
         'Cfdi\\XmlBuilder' => __DIR__ . '/../..' . '/src/XmlBuilder.php',
+        'Cfdi\\XmlTrait' => __DIR__ . '/../..' . '/src/XmlTrait.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
 

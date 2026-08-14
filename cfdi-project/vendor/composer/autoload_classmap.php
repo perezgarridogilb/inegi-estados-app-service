@@ -6,7 +6,8 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Cfdi\\XmlTrait' => $baseDir . '/src/XmlTrait.php',
+    'Cfdi\\Services\\CfdiXsdValidator' => $baseDir . '/src/Services/CfdiXsdValidator.php',
     'Cfdi\\XmlBuilder' => $baseDir . '/src/XmlBuilder.php',
+    'Cfdi\\XmlTrait' => $baseDir . '/src/XmlTrait.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
 );
