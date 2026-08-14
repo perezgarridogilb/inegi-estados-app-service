@@ -38,11 +38,8 @@ trait XmlTrait
     ): string {
         return bcmul($quantity, $valUnit, 2);
     }
-    
-    /**
-     * Calculate concepto->traslados->importe (IVA trasladado)
-     * Importe IVA = Base (importe del concepto) × TasaOCuota
-     *
+
+    /** (IVA trasladado)
      * @see Guía de llenado CFDI - Estándar de comprobante fiscal digital
      * @link https://www.sat.gob.mx/minisitio/Factura/documentos/Guia_llenadoCFDI_DPA.pdf#page=19
      *
@@ -55,6 +52,37 @@ trait XmlTrait
         string $tasaOCuota
     ): string {
         return bcmul($base, $tasaOCuota, 2);
+    }
+
+    /**
+     * @see Guía de llenado CFDI - Estándar de comprobante fiscal digital
+     * @link https://www.sat.gob.mx/minisitio/Factura/documentos/Guia_llenadoCFDI_DPA.pdf#page=7
+     *
+     * @param string $base Base gravable (importe del concepto, después de descuento)
+     * @param string $tasaOCuota Tasa o cuota del impuesto (ej. "0.160000")
+     * @return string Importe del traslado calculado
+     */
+public function calculateSubtotalFromDataGeneral(
+        array $concepts,
+    ): string {
+        $subtotal = [];
+        foreach ($concepts as $concept) {
+            $concept->subtotal = $this->calculateImporteFromQuantity((string) $concept->cantidad, (string) $concept->valorUnitario);
+            $subtotal[] = $concept->subtotal;
+        }
+        return $this->numberFormat2Dec(...$subtotal);
+    }
+
+    /**
+     * @see Guía de llenado CFDI - Estándar de comprobante fiscal digital
+     * @link https://www.sat.gob.mx/minisitio/Factura/documentos/Guia_llenadoCFDI_DPA.pdf#page=8
+     *
+     * */
+    public function calculateTotalFromDataGeneral(
+        string $importe,
+        string $tasaOCuota
+    ): string {
+        return bcmul($importe, bcadd($tasaOCuota, "1", 6), 2);
     }
 
     /**

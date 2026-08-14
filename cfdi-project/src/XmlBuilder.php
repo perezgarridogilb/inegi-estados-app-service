@@ -22,6 +22,7 @@ class XmlBuilder
         'cfdi' => 'http://www.sat.gob.mx/cfd/4',
         'xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
     ];
+
     public function __construct(object $data)
     {
         $this->data = $data;
@@ -32,7 +33,7 @@ class XmlBuilder
     }
 
     /**
-     * Named Constructor para instanciar el Builder con el objeto de datos.
+     * Named Constructor to instance this Builder with the object data.
      */
     public static function make(object $data): self
     {
@@ -52,22 +53,23 @@ class XmlBuilder
 
     public function buildDatosGenerales(): self
     {
+        $this->data->comprobante->subtotal = $this->calculateSubtotalFromDataGeneral($this->data->conceptos);
+        $this->data->comprobante->total = $this->calculateTotalFromDataGeneral($this->data->comprobante->subtotal, self::TASA_O_QUOTA);
+
         $this->comprobante->setAttribute('Serie', $this->data->comprobante->serie ?? 'A');
         $this->comprobante->setAttribute('Folio', $this->data->comprobante->folio ?? uniqid());
         $this->comprobante->setAttribute('Fecha', $this->dateGeneral());
         $this->comprobante->setAttribute('MetodoPago', $this->data->comprobante->metodoPago ?? 'PUE');
         $this->comprobante->setAttribute('FormaPago', $this->data->comprobante->formaPago ?? '01');
         $currency = $this->currencyByCode($this->data->comprobante->moneda);
-
         $this->comprobante->setAttribute('Moneda', $currency['code'] ?? 'MXN');
         
         // $this->comprobante->setAttribute('TipoCambio', (string) ($this->data->tipoCambio ?? '1'));
-
         $this->comprobante->setAttribute('TipoDeComprobante', $this->data->comprobante->tipoDeComprobante ?? 'I');
         $this->comprobante->setAttribute('LugarExpedicion', $this->data->comprobante->lugarExpedicion ?? '');
         $this->comprobante->setAttribute('Exportacion', '01');        
         $this->comprobante->setAttribute('Descuento', $this->data->comprobante->exportacion ?? '01');        
-        $this->comprobante->setAttribute('SubTotal', (string) ($this->data->comprobante->subTotal ?? '0'));
+        $this->comprobante->setAttribute('SubTotal', (string) ($this->data->comprobante->subtotal ?? '0'));
         $this->comprobante->setAttribute('Total', (string) ($this->data->comprobante->total ?? '0'));
 
         return $this;
@@ -121,7 +123,7 @@ class XmlBuilder
             $node->setAttribute('ClaveUnidad', $concepto->claveUnidad ?? 'ACT');
             $node->setAttribute('Descripcion', $concepto->descripcion ?? '');
             $node->setAttribute('ValorUnitario', ($concepto->valorUnitario ?? '0'));
-            $node->setAttribute('Importe', $concepto->importe ?? '0');
+            $node->setAttribute('Importe', $concepto->sutotal ?? '0');
 
             $node->setAttribute('ObjetoImp', (string) ($concepto->objetoImp ?? '02'));
             // $node->setAttribute('NoIdentificacion', (string) ($concepto->importe ?? '0'));
@@ -130,7 +132,7 @@ class XmlBuilder
             $hasTraslados = $concepto->objetoImp === '02' ? true : false;
             // $hasRetenciones = null;
 
-            if ($hasTraslados/*  && !$hasRetenciones */) {
+            if ($hasTraslados) {
                 $this->buildImpuestosConcepto($node, $concepto);
             }
             $this->conceptosNode->appendChild($node);
@@ -153,7 +155,6 @@ class XmlBuilder
 
         $impuestosNode = $this->doc->createElement('cfdi:Impuestos');
         $trasladosNode = $this->doc->createElement('cfdi:Traslados');
-        // foreach ($concepto->traslados as $traslado) {
 
         $node = $this->doc->createElement('cfdi:Traslado');
         $node->setAttribute('Base', $concepto->importe);
@@ -170,20 +171,6 @@ class XmlBuilder
         $node->setAttribute('Importe', $concepto->traslados->importe);
         $trasladosNode->appendChild($node);
         $impuestosNode->appendChild($trasladosNode);
-        // }
-        // }
-
-        //Persona física, régimen 612/621/606/626
-        // 2. Retenciones
-        // if ($hasRetenciones) {
-        //     $retencionesNode = $this->doc->createElement('cfdi:Retenciones');
-        //     foreach ($concepto->retenciones as $retencion) {
-        //         $node = $this->doc->createElement('cfdi:Retencion');
-        //         $node->setAttribute('Base', (string) ($retencion->base ?? $concepto->importe));
-        //         $retencionesNode->appendChild($node);
-        //     }
-        //     $impuestosNode->appendChild($retencionesNode);
-        // }
 
         $conceptoNode->appendChild($impuestosNode);
     }
