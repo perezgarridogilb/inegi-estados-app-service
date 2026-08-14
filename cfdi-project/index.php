@@ -39,16 +39,22 @@ function main(?array $argv): int
         return 1;
     }
 
-    $data = json_decode($jsonContent, false);
-    $xml = XmlBuilder::make($data)
-        ->buildDatosGenerales()
-        ->buildEmisor()
-        ->buildReceptor()
-        ->buildConceptos()
-        ->buildImpuestosComprobante();
+    try {
+        $data = json_decode($jsonContent, false, 512, JSON_THROW_ON_ERROR);
 
-    $filePath = __DIR__ . '/cfdi_generado.xml';
-    if (file_put_contents($filePath, $xml->getXml()) !== false) {
+        $xml = XmlBuilder::make($data)
+            ->buildDatosGenerales()
+            ->buildEmisor()
+            ->buildReceptor()
+            ->buildConceptos()
+            ->buildImpuestosComprobante();
+
+        $filePath = __DIR__ . '/cfdi_generado.xml';
+
+        if (file_put_contents($filePath, $xml->getXml()) === false) {
+            throw new Exception("No se pudo guardar el archivo en la ruta: {$filePath}");
+        }
+
         echo "Archivo XML guardado exitosamente en: {$filePath}\n";
 
         $validator = new CfdiXsdValidator();
@@ -56,17 +62,21 @@ function main(?array $argv): int
 
         if ($result['valid']) {
             echo "Validación XSD: OK\n";
-        } else {
-            echo "Validación XSD: FALLÓ\n";
-            foreach ($result['errors'] as $error) {
-                echo "  - {$error}\n";
-            }
+            return 0;
         }
-        return 0;
-    }
 
-    echo "Error al guardar el archivo XML. Revisa permisos de escritura.\n";
-    return 1;
+        echo "Validación XSD: FALLÓ\n";
+        foreach ($result['errors'] as $error) {
+            echo "  - {$error}\n";
+        }
+        return 1;
+    } catch (\JsonException $e) {
+        echo "Error de sintaxis o estructura en el JSON: " . $e->getMessage() . "\n";
+        return 1;
+    } catch (\Throwable $e) {
+        echo "Error inesperado durante el procesamiento: " . $e->getMessage() . "\n";
+        return 1;
+    }
 }
 
 exit(main($argv ?? null));
