@@ -17,6 +17,9 @@ trait XmlTrait
         return null;
     }
 
+    /**
+     * @link https://www.sat.gob.mx/minisitio/Factura/documentos/Guia_llenadoCFDI_DPA.pdf#page=5
+     */
     protected function dateGeneral(): string
     {
         $date = date('Y-m-d');
@@ -25,12 +28,11 @@ trait XmlTrait
         return $invoiceDate;
     }
     /**
-     * @see Guía de llenado CFDI - Estándar de comprobante fiscal digital
      * @link https://www.sat.gob.mx/minisitio/Factura/documentos/Guia_llenadoCFDI_DPA.pdf#page=19
      *
-     * @param string $quantity Cantidad del concepto
-     * @param string $valUnit  Valor unitario del concepto
-     * @return string Importe calculado
+     * @param string $quantity Concept quantity
+     * @param string $valUnit  Concept unit value
+     * @return string Calculated amount
      */
     public function calculateImporteFromQuantity(
         string $quantity,
@@ -39,13 +41,12 @@ trait XmlTrait
         return bcmul($quantity, $valUnit, 4);
     }
 
-    /** (IVA trasladado)
-     * @see Guía de llenado CFDI - Estándar de comprobante fiscal digital
-     * @link https://www.sat.gob.mx/minisitio/Factura/documentos/Guia_llenadoCFDI_DPA.pdf#page=19
+    /** (IVA transferred)
+     * @link https://www.sat.gob.mx/minisitio/Factura/documentos/Guia_llenadoCFDI_DPA.pdf#page=20
      *
-     * @param string $base Base gravable (importe del concepto, después de descuento)
-     * @param string $tasaOCuota Tasa o cuota del impuesto (ej. "0.160000")
-     * @return string Importe del traslado calculado
+     * @param string $base Taxable base (concept amount, after discount)
+     * @param string $tasaOCuota Tax rate or quota (e.g. "0.160000")
+     * @return string Calculated transfer amount
      */
     public function calculateTrasladoImporteFromBase(
         string $base,
@@ -55,14 +56,12 @@ trait XmlTrait
     }
 
     /**
-     * @see Guía de llenado CFDI - Estándar de comprobante fiscal digital
      * @link https://www.sat.gob.mx/minisitio/Factura/documentos/Guia_llenadoCFDI_DPA.pdf#page=7
      *
-     * @param string $base Base gravable (importe del concepto, después de descuento)
-     * @param string $tasaOCuota Tasa o cuota del impuesto (ej. "0.160000")
-     * @return string Importe del traslado calculado
+     * @param array $concepts Invoice concepts
+     * @return string Invoice subtotal
      */
-public function calculateSubtotalFromDataGeneral(
+    public function calculateSubtotalFromDataGeneral(
         array $concepts,
     ): string {
         $subtotal = [];
@@ -74,10 +73,11 @@ public function calculateSubtotalFromDataGeneral(
     }
 
     /**
-     * @see Guía de llenado CFDI - Estándar de comprobante fiscal digital
      * @link https://www.sat.gob.mx/minisitio/Factura/documentos/Guia_llenadoCFDI_DPA.pdf#page=24
      *
-     * */
+     * @param array $concepts Invoice concepts
+     * @return array{0: string, 1: string} [total taxable base, total transferred taxes]
+     */
     public function calculateTaxesAndAmount(
         array $concepts,
     ): array {
@@ -94,10 +94,8 @@ public function calculateSubtotalFromDataGeneral(
         ];
     }
     /**
-     * @see Guía de llenado CFDI - Estándar de comprobante fiscal digital
      * @link https://www.sat.gob.mx/minisitio/Factura/documentos/Guia_llenadoCFDI_DPA.pdf#page=8
-     *
-     * */
+     */
     public function calculateTotalFromDataGeneral(
         string $importe,
         string $tasaOCuota
@@ -106,8 +104,8 @@ public function calculateSubtotalFromDataGeneral(
     }
 
     /**
-     * Format numbers with 2 decimal places
-     * 
+     * Sums the given numbers and formats them with 2 decimal places.
+     *
      * @param string ...$numbers
      * @return string
      */

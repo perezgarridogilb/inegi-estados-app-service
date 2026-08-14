@@ -55,11 +55,11 @@ class XmlBuilder
         $this->data->comprobante->subtotal = $this->calculateSubtotalFromDataGeneral($this->data->conceptos);
         $this->data->comprobante->total = $this->calculateTotalFromDataGeneral($this->data->comprobante->subtotal, self::TASA_O_QUOTA);
 
-        $this->comprobante->setAttribute('Serie', $this->data->comprobante->serie ?? 'A');
-        $this->comprobante->setAttribute('Folio', $this->data->comprobante->folio ?? uniqid());
+        $this->comprobante->setAttribute('Serie', $this->data->comprobante->serie);
+        $this->comprobante->setAttribute('Folio', $this->data->comprobante->folio);
         $this->comprobante->setAttribute('Fecha', $this->dateGeneral());
-        $this->comprobante->setAttribute('MetodoPago', $this->data->comprobante->metodoPago ?? 'PUE');
-        $this->comprobante->setAttribute('FormaPago', $this->data->comprobante->formaPago ?? '01');
+        $this->comprobante->setAttribute('FormaPago', $this->data->comprobante->formaPago);
+        $this->comprobante->setAttribute('MetodoPago', $this->data->comprobante->metodoPago);
         $currency = $this->currencyByCode($this->data->comprobante->moneda);
         $this->comprobante->setAttribute('Moneda', $currency['code'] ?? 'MXN');
         // $this->comprobante->setAttribute('TipoCambio', (string) ($this->data->tipoCambio ?? '1'));
@@ -123,8 +123,8 @@ class XmlBuilder
             $node->setAttribute('Cantidad', ($concepto->cantidad ?? '1'));
             $node->setAttribute('ClaveUnidad', $concepto->claveUnidad ?? 'ACT');
             $node->setAttribute('Descripcion', $concepto->descripcion ?? '');
-            $node->setAttribute('ValorUnitario', ($concepto->valorUnitario ?? '0.00'));
-            $node->setAttribute('Importe', $concepto->importe ?? '0.00');
+            $node->setAttribute('ValorUnitario', $concepto->valorUnitario);
+            $node->setAttribute('Importe', $this->numberFormat2Dec($concepto->importe));
             $node->setAttribute('ObjetoImp', $concepto->objetoImp ?? '02');
             // $node->setAttribute('NoIdentificacion', (string) ($concepto->importe ?? '0.00'));
             $node->setAttribute('Descuento', '0.00');
@@ -134,7 +134,6 @@ class XmlBuilder
             }
             $this->conceptosNode->appendChild($node);
         }
-        // $this->buildImpuestosComprobante();
 
         return $this;
     }
@@ -145,7 +144,7 @@ class XmlBuilder
     protected function buildImpuestosConcepto(DOMElement $conceptoNode, object $concepto): void
     {
         $concepto->traslados = new stdClass();
-        $concepto->traslados->importe = $this->calculateTrasladoImporteFromBase((string) $concepto->importe, self::TASA_O_QUOTA);
+        $concepto->traslados->importe = $this->calculateTrasladoImporteFromBase((string) $concepto->importe, (string) $concepto->iva);
 
         $impuestosNode = $this->doc->createElement('cfdi:Impuestos');
         $trasladosNode = $this->doc->createElement('cfdi:Traslados');
@@ -158,7 +157,7 @@ class XmlBuilder
         /**
          * @link https://www.sat.gob.mx/minisitio/Factura/documentos/Guia_llenadoCFDI_DPA.pdf#page=21
          */
-        $node->setAttribute('TasaOCuota', self::TASA_O_QUOTA);
+        $node->setAttribute('TasaOCuota', $concepto->iva);
         $node->setAttribute('Importe', $this->numberFormat2Dec($concepto->traslados->importe));
         $trasladosNode->appendChild($node);
         $impuestosNode->appendChild($trasladosNode);
@@ -167,19 +166,20 @@ class XmlBuilder
 
     public function buildImpuestosComprobante(): self
     {
-        array_fill(0, 2, '0.00');
+        list($base, $totalTrasladados) = array_fill(0, 2, '0.00');
         list($base, $totalTrasladados) = $this->calculateTaxesAndAmount($this->data->conceptos);
         $impuestosNode = $this->doc->createElement('cfdi:Impuestos');
         $impuestosNode->setAttribute('TotalImpuestosTrasladados', $totalTrasladados);
         $trasladosNode = $this->doc->createElement('cfdi:Traslados');
 
+        $tasaCalculada = ($base > 0) ? ($totalTrasladados / $base) : 0;
+        $tasaOCuotaFormatted = number_format($tasaCalculada, 6, '.', '');
         $node = $this->doc->createElement('cfdi:Traslado');
         $node->setAttribute('Base', $base);
         $node->setAttribute('Impuesto', '002');
         $node->setAttribute('TipoFactor', 'Tasa');
-        $node->setAttribute('TasaOCuota', self::TASA_O_QUOTA);
+        $node->setAttribute('TasaOCuota', $tasaOCuotaFormatted);
         $node->setAttribute('Importe', $totalTrasladados);
-
         $trasladosNode->appendChild($node);
         $impuestosNode->appendChild($trasladosNode);
         $this->comprobante->appendChild($impuestosNode);
