@@ -64,12 +64,11 @@ trait XmlTrait
     public function calculateSubtotalFromDataGeneral(
         array $concepts,
     ): string {
-        $subtotal = [];
+        $subtotal = "0.00";
         foreach ($concepts as $concept) {
-            $concept->subtotal = $this->calculateImporteFromQuantity((string) $concept->cantidad, (string) $concept->valorUnitario);
-            $subtotal[] = $concept->subtotal;
+            $subtotal = bcadd($subtotal, $this->calculateImporteFromQuantity((string) $concept->cantidad, (string) $concept->valorUnitario), 4);
         }
-        return $this->numberFormat2Dec(...$subtotal);
+        return $this->numberFormat2Dec($subtotal);
     }
 
     /**
@@ -81,51 +80,38 @@ trait XmlTrait
     public function calculateTaxesAndAmount(
         array $concepts,
     ): array {
-        $base = [];
-        $totalTrasladados = [];
+        $base = "0.00";
+        $totalTrasladados = "0.00";
 
         foreach ($concepts as $concept) {
-            $base[] = $concept->importe;
-            $totalTrasladados[] = $concept->traslados->importe;
+            $base = bcadd($base, (string) $concept->importe, 4);
+            $totalTrasladados = bcadd($totalTrasladados, (string) $concept->traslados->importe, 4);
         }
         return [
-            $this->numberFormat2Dec(...$base),
-            $this->numberFormat2Dec(...$totalTrasladados)
+            $this->numberFormat2Dec($base),
+            $this->numberFormat2Dec($totalTrasladados)
         ];
     }
     /**
      * @link https://www.sat.gob.mx/minisitio/Factura/documentos/Guia_llenadoCFDI_DPA.pdf#page=8
      */
     public function calculateTotalFromDataGeneral(
-        string $importe,
-        array $concepts
+        string $base,
+        string $totalTrasladados
     ): string {
-        $iva = (function ($items) {
-            $resultado = [];
-            foreach ($items as $c) {
-                $resultado[] = $c->iva;
-            }
-            return $resultado;
-        })($concepts);
-        $promedio = bcdiv($this->numberFormat2Dec(...$iva), (string) count($iva), 6);
-        return bcmul($importe, bcadd($promedio, "1", 6), 2);
+        return $this->numberFormat2Dec(
+            bcadd($base, $totalTrasladados, 4)
+        );
     }
 
     /**
      * Sums the given numbers and formats them with 2 decimal places.
      *
-     * @param string ...$numbers
+     * @param string $number
      * @return string
      */
-    protected function numberFormat2Dec(
-        string ...$numbers
-    ): string {
-        $sum = '0';
-
-        foreach ($numbers as $n) {
-            $sum = bcadd($sum, $n, 4);
-        }
-
-        return number_format((float)$sum, 2, '.', '');
+    protected function numberFormat2Dec(string $number): string 
+    {
+        return bcadd($number, '0', 2);
     }
 }

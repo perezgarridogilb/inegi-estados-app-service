@@ -50,8 +50,9 @@ class XmlBuilder
 
     public function buildDatosGenerales(): self
     {
+
         $this->data->comprobante->subtotal = $this->calculateSubtotalFromDataGeneral($this->data->conceptos);
-        $this->data->comprobante->total = $this->calculateTotalFromDataGeneral($this->data->comprobante->subtotal, $this->data->conceptos);
+        $this->data->comprobante->total = "0.00";
 
         $this->comprobante->setAttribute('Serie', $this->data->comprobante->serie);
         $this->comprobante->setAttribute('Folio', $this->data->comprobante->folio);
@@ -67,8 +68,8 @@ class XmlBuilder
         $this->comprobante->setAttribute('Descuento', '0.00');        
         $this->comprobante->setAttribute('SubTotal', $this->data->comprobante->subtotal ?? '0.00');
         $this->comprobante->setAttribute('Total', $this->data->comprobante->total ?? '0.00');
-        $this->comprobante->setAttribute('NoCertificado', '00001000000720371816');
-        $this->comprobante->setAttribute('Certificado', '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');
+        $this->comprobante->setAttribute('NoCertificado', '00001000000723626970');
+        $this->comprobante->setAttribute('Certificado', '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');
         $this->comprobante->setAttribute('Sello', '');
 
         return $this;
@@ -80,7 +81,7 @@ class XmlBuilder
         $node = $this->doc->createElement('cfdi:Emisor');
         $node->setAttribute('Rfc', $emisor->rfc ?? '');
         $node->setAttribute('Nombre', $emisor->nombre ?? '');
-        $node->setAttribute('RegimenFiscal', $emisor->regimenFiscal ?? '601');
+        $node->setAttribute('RegimenFiscal', $emisor->regimenFiscal ?? '');
 
         $this->comprobante->appendChild($node);
 
@@ -117,9 +118,9 @@ class XmlBuilder
             );
 
             $node = $this->doc->createElement('cfdi:Concepto');
-            $node->setAttribute('ClaveProdServ', $concepto->claveProdServ ?? '84111506');
-            $node->setAttribute('Cantidad', ($concepto->cantidad ?? '1'));
-            $node->setAttribute('ClaveUnidad', $concepto->claveUnidad ?? 'ACT');
+            $node->setAttribute('ClaveProdServ', $concepto->claveProdServ ?? '');
+            $node->setAttribute('Cantidad', ($concepto->cantidad ?? ''));
+            $node->setAttribute('ClaveUnidad', $concepto->claveUnidad ?? '');
             $node->setAttribute('Descripcion', $concepto->descripcion ?? '');
             $node->setAttribute('ValorUnitario', $concepto->valorUnitario);
             $node->setAttribute('Importe', $this->numberFormat2Dec($concepto->importe));
@@ -166,6 +167,9 @@ class XmlBuilder
     {
         list($base, $totalTrasladados) = array_fill(0, 2, '0.00');
         list($base, $totalTrasladados) = $this->calculateTaxesAndAmount($this->data->conceptos);
+        
+        $this->comprobante->setAttribute('Total', $this->calculateTotalFromDataGeneral($base, $totalTrasladados));
+
         $impuestosNode = $this->doc->createElement('cfdi:Impuestos');
         $impuestosNode->setAttribute('TotalImpuestosTrasladados', $totalTrasladados);
         $trasladosNode = $this->doc->createElement('cfdi:Traslados');
