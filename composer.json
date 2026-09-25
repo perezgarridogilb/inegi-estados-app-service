@@ -9,6 +9,8 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
+        "bref/bref": "^3.0",
+        "bref/laravel-bridge": "^3.1",
         "firebase/php-jwt": "^6.10",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.10",
@@ -65,6 +67,9 @@
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,
+        "audit": {
+            "block-insecure": false
+        },
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true

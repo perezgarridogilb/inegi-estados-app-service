@@ -28,3 +28,12 @@ Homestead.json
 .env.production
 .phpactor.json
 auth.json
+
+# macOS
+.DS_Store
+
+# Serverless / Bref
+.serverless/
+.serverless_plugins/
+.bref/
+# serverless.yml   # NO ignorar: versionable. Mueve secretos a SSM antes de commitearlo
