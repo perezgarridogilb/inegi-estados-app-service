@@ -36,6 +36,15 @@ class MunicipalityController extends Controller
     }
     public function sync($key_state): JsonResponse
     {
+        /**
+         *   $municipalities = Cache::remember($cacheKey, now()->addHours(24), function () use ($key_state) {
+         *       try {
+         *           return $this->inegiClient->getMunicipalities($key_state);
+         *       } catch (\Exception $e) {
+         *           throw $e;
+         *       }
+         *   });
+         */
         try {
             $municipalities = $this->inegiClient->getMunicipalities($key_state);
         } catch (\Exception $e) {
