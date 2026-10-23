@@ -38,7 +38,7 @@ trait XmlTrait
         string $quantity,
         string $valUnit
     ): string {
-        return bcmul($quantity, $valUnit, 4);
+        return bcmul($quantity, $valUnit, 6);
     }
 
     /** (IVA transferred)
@@ -52,7 +52,7 @@ trait XmlTrait
         string $base,
         string $tasaOCuota
     ): string {
-        return bcmul($base, $tasaOCuota, 4);
+        return bcmul($base, $tasaOCuota, 6);
     }
 
     /**
@@ -84,8 +84,8 @@ trait XmlTrait
         $totalTrasladados = "0.00";
 
         foreach ($concepts as $concept) {
-            $base = bcadd($base, (string) $concept->importe, 4);
-            $totalTrasladados = bcadd($totalTrasladados, (string) $concept->traslados->importe, 4);
+            $base = bcadd($base, (string) $concept->importe, 6);
+            $totalTrasladados = bcadd($totalTrasladados, $this->numberFormat2Dec((string) $concept->traslados->importe), 2);
         }
         return [
             $this->numberFormat2Dec($base),
@@ -112,6 +112,8 @@ trait XmlTrait
      */
     protected function numberFormat2Dec(string $number): string 
     {
-        return bcadd($number, '0', 2);
+        $half = str_starts_with($number, '-') ? '-0.005' : '0.005';
+
+        return bcadd($number, $half, 2);
     }
 }

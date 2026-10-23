@@ -174,8 +174,7 @@ class XmlBuilder
         $impuestosNode->setAttribute('TotalImpuestosTrasladados', $totalTrasladados);
         $trasladosNode = $this->doc->createElement('cfdi:Traslados');
 
-        $tasaCalculada = ($base > 0) ? ($totalTrasladados / $base) : 0;
-        $tasaOCuotaFormatted = number_format($tasaCalculada, 6, '.', '');
+        $tasaOCuotaFormatted = (string) $this->data->conceptos[0]->iva;
         $node = $this->doc->createElement('cfdi:Traslado');
         $node->setAttribute('Base', $base);
         $node->setAttribute('Impuesto', '002');
