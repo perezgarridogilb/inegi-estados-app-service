@@ -37,3 +37,4 @@ auth.json
 .serverless_plugins/
 .bref/
 # serverless.yml   # NO ignorar: versionable. Mueve secretos a SSM antes de commitearlo
+CFDI-TEST-master

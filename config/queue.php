@@ -71,6 +71,94 @@ return [
             'after_commit' => false,
         ],
 
+        /*
+         * Conexión RabbitMQ (CloudAMQP) — jobs de Laravel (publicación directa a colas).
+         *
+         * Cola y su CONSUMIDOR:
+         *   - "default" -> php artisan queue:work rabbitmq --queue=default
+         *                  (consume TestJob)
+         *
+         * PRODUCTOR:
+         *   - php artisan app:fire   (TestJob -> cola "default")
+         *
+         * Los eventos (JSON plano) usan la conexión "rabbitmq-events" y
+         * "php artisan rabbit:listen", no este worker de colas.
+         */
+        // 'rabbitmq' => [
+        //     'driver' => 'rabbitmq',
+        //     'queue' => env('RABBITMQ_QUEUE', 'default'),
+        //     'connection' => PhpAmqpLib\Connection\AMQPLazyConnection::class,
+
+        //     'hosts' => [
+        //         [
+        //             'host' => env('RABBITMQ_HOST', '127.0.0.1'),
+        //             'port' => env('RABBITMQ_PORT', 5672),
+        //             'user' => env('RABBITMQ_USER', 'guest'),
+        //             'password' => env('RABBITMQ_PASSWORD', 'guest'),
+        //             'vhost' => env('RABBITMQ_VHOST', '/'),
+        //         ],
+        //     ],
+
+        //     'options' => [
+        //         'ssl_options' => [
+        //             'cafile' => env('RABBITMQ_SSL_CAFILE', null),
+        //             'local_cert' => env('RABBITMQ_SSL_LOCALCERT', null),
+        //             'local_key' => env('RABBITMQ_SSL_LOCALKEY', null),
+        //             'verify_peer' => env('RABBITMQ_SSL_VERIFY_PEER', true),
+        //             'passphrase' => env('RABBITMQ_SSL_PASSPHRASE', null),
+        //         ],
+        //     ],
+
+        //     /*
+        //      * Set to "horizon" if you wish to use Laravel Horizon.
+        //      */
+        //     'worker' => env('RABBITMQ_WORKER', 'default'),
+
+        // ],
+
+        /*
+         * Configuración AMQP para LISTENERS DE EVENTOS (no es un worker de cola).
+         *
+         * CONSUMIDOR de ejemplo:
+         *   - php artisan rabbit:listen "App\Rabbit\Listeners\OrderConfirmedListener"
+         */
+        'rabbitmq-events' => [
+            'driver' => 'rabbitmq',
+            // Cola por defecto del listener de ejemplo.
+            'queue' => 'order-confirmed-queue',
+            'connection' => PhpAmqpLib\Connection\AMQPLazyConnection::class,
+
+            'hosts' => [
+                [
+                    'host' => env('RABBITMQ_HOST', '127.0.0.1'),
+                    'port' => env('RABBITMQ_PORT', 5672),
+                    'user' => env('RABBITMQ_USER', 'guest'),
+                    'password' => env('RABBITMQ_PASSWORD', 'guest'),
+                    'vhost' => env('RABBITMQ_VHOST', '/'),
+                ],
+            ],
+
+            'options' => [
+                // Exchange al que se publica (nombre configurable por .env).
+                'queue' => [
+                    'exchange' => env('RABBITMQ_EXCHANGE', 'app_exchange'),
+                    'exchange_type' => 'direct',
+                    // Routing key por defecto del listener de ejemplo.
+                    'exchange_routing_key' => 'order.confirmed',
+                ],
+
+                'ssl_options' => [
+                    'cafile' => env('RABBITMQ_SSL_CAFILE', null),
+                    'local_cert' => env('RABBITMQ_SSL_LOCALCERT', null),
+                    'local_key' => env('RABBITMQ_SSL_LOCALKEY', null),
+                    'verify_peer' => env('RABBITMQ_SSL_VERIFY_PEER', true),
+                    'passphrase' => env('RABBITMQ_SSL_PASSPHRASE', null),
+                ],
+            ],
+
+            'worker' => env('RABBITMQ_WORKER', 'default'),
+        ],
+
     ],
 
     /*
