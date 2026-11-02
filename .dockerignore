@@ -1,0 +1,89 @@
+# =============================================================================
+# .dockerignore — qué NO se envía al contexto de build
+#
+# Objetivo:
+#   1. No hornear secretos (.env) en la imagen.
+#   2. Reducir el contexto (~1.2 GB -> ~30-50 MB).
+#   3. Evitar que archivos locales pisen lo generado en el build
+#      (vendor, node_modules, caches, logs, sesiones).
+# =============================================================================
+
+# --- Git, IDE y basura del SO ------------------------------------------------
+.git
+.gitignore
+.gitattributes
+.idea
+.vscode
+**/.DS_Store
+**/.AppleDouble
+**/Thumbs.db
+
+# --- Secretos: NUNCA dentro de la imagen -------------------------------------
+# Se inyectan en runtime (docker run --env-file | ECS task definition).
+.env
+.env.*
+!.env.example
+
+# --- Dependencias: se instalan dentro del build ------------------------------
+/vendor
+/node_modules
+
+# --- Proyectos anidados: la app raíz no los usa ------------------------------
+# (son aplicaciones Laravel independientes con su propio vendor/.env)
+/admin
+/main
+/CFDI-TEST-master
+/cfdi-project
+
+# --- Datos generados en local -------------------------------------------------
+# Logs
+/storage/logs/*
+!/storage/logs/.gitignore
+
+# Sesiones
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+
+# Vistas compiladas (Blade)
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
+
+# Cache de framework (incluye cache/data)
+/storage/framework/cache/data/*
+!/storage/framework/cache/data/.gitignore
+
+# Testing
+/storage/framework/testing/*
+!/storage/framework/testing/.gitignore
+
+# Uploads públicos
+/storage/app/public/*
+!/storage/app/public/.gitignore
+
+# Manifest de paquetes y config cache (se regeneran en runtime)
+/bootstrap/cache/*.php
+
+# --- Tests y tooling de desarrollo --------------------------------------------
+/tests
+/phpunit.xml
+/pint.json
+/.phpunit.cache
+/.php-cs-fixer.cache
+
+# --- Frontend: solo se necesita public/build (ya compilado) -------------------
+/package.json
+/package-lock.json
+/vite.config.js
+/public/hot
+/public/storage
+
+# --- Despliegue / docs / SQL ---------------------------------------------------
+/serverless.yml
+/.serverless
+/docker-compose*.yml
+/Dockerfile
+/.dockerignore
+/README.md
+/LICENSE
+/inegi_estados.sql
+/stash_commands.txt
