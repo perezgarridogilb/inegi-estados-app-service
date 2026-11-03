@@ -1,0 +1,96 @@
+# Compose para desarrollo/pruebas locales de la app raíz.
+#
+# - Las variables de negocio viven en .env (env_file), NO aquí.
+# - El contenedor NO monta el código: usa lo que ya viene en la imagen.
+#   (Montar ./:/var/www/html taparía vendor y todo lo instalado en el build.)
+# - Base de datos: MySQL de Homebrew en el host (127.0.0.1:3306).
+#   Desde el contenedor se llega como host.docker.internal:3306.
+#   Credenciales: las del .env (root, sin password).
+
+services:
+  app:
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    image: inegi-estados-app:local
+    container_name: inegi-estados-app
+    restart: unless-stopped
+    ports:
+      - "8879:80"
+    env_file:
+      - .env
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8879
+      # Sobrescribe el .env: 127.0.0.1 dentro del contenedor es el propio
+      # contenedor, no el host.
+      DB_CONNECTION: mysql
+      DB_HOST: host.docker.internal
+      DB_PORT: "3306"
+      DB_DATABASE: inegi_estados
+      DB_USERNAME: root
+      DB_PASSWORD: ""
+      QUEUE_CONNECTION: rabbitmq
+      LOG_CHANNEL: stderr
+      LOG_LEVEL: debug
+      # La imagen trae xdebug compilado y en modo debug: sin esto cada request
+      # intenta conectar a host.docker.internal:9003 y espera el timeout.
+      # Para depurar desde el contenedor, cambiar a "debug".
+      XDEBUG_MODE: "off"
+    extra_hosts:
+      # Necesario en Linux; en Docker Desktop ya existe, pero no molesta.
+      - "host.docker.internal:host-gateway"
+    networks:
+      - laravel_network
+
+  # ---------------------------------------------------------------------------
+  # Listener push de eventos RabbitMQ (independiente del servidor web).
+  # COMENTADO: por ahora solo se prueba el servidor web con la DB del host.
+  #
+  # Para activarlo, descomentar y levantar con:
+  #   docker compose up -d --build listener
+  #
+  # PRODUCTOR:  php artisan rabbit:fire-order-confirmed  (FireOrderConfirmed)
+  #             publica en exchange `app_exchange`, routing key `order.confirmed`.
+  # CONSUMIDOR: este servicio (`rabbit:listen`) consume la cola
+  #             `order-confirmed-queue` y ejecuta OrderConfirmedListener.
+  #
+  # En producción no va aquí: corre como daemon supervisado
+  # (deploy/supervisor o deploy/systemd) con este mismo comando.
+  # ---------------------------------------------------------------------------
+  # listener:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   image: inegi-estados-app:local
+  #   container_name: inegi-estados-listener
+  #   restart: unless-stopped
+  #   stop_grace_period: 30s
+  #   command:
+  #     - php
+  #     - artisan
+  #     - rabbit:listen
+  #     - 'App\Rabbit\Listeners\OrderConfirmedListener'
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     APP_ENV: local
+  #     DB_CONNECTION: mysql
+  #     DB_HOST: host.docker.internal
+  #     DB_PORT: "3306"
+  #     DB_DATABASE: inegi_estados
+  #     DB_USERNAME: root
+  #     DB_PASSWORD: ""
+  #     QUEUE_CONNECTION: rabbitmq
+  #     LOG_CHANNEL: stderr
+  #     LOG_LEVEL: debug
+  #     XDEBUG_MODE: "off"
+  #   extra_hosts:
+  #     - "host.docker.internal:host-gateway"
+  #   networks:
+  #     - laravel_network
+
+networks:
+  laravel_network:
+    driver: bridge
