@@ -1,55 +1,80 @@
 # inegi-estados-app-service
 
-Servicio Laravel para consultar estados y municipios desde el API de INEGI, mostrarlos con DataTables.
+Laravel 10 para consultar estados y municipios del API de INEGI (DataTables + Bootstrap 5).
 
 ## Stack
 
-- Laravel 10
-- MySQL (tablas `states` y `municipalities`)
-- DataTables + Bootstrap 5
-- Repositorios en `App\Repositories` (carpeta `app/Http/Repositories/`)
+- Laravel 10 / PHP 8.2 / MySQL (`states`, `municipalities`)
+- RabbitMQ con `php-amqplib` (listener push tipo `@RabbitListener`)
 
 ## Setup
 
 ```bash
 composer install
-cp .env.example .env
+cp .env.example .env        # si no existe, crea .env con las variables de abajo
 php artisan key:generate
-
 php artisan migrate
 php artisan db:seed --class=StateSeeder
 php artisan db:seed --class=MunicipalitySeeder
 ```
 
-En `.env`:
+Variables mínimas en `.env`:
 
 ```
 DB_DATABASE=inegi_estados
 DB_USERNAME=root
+DB_PASSWORD=
 INEGI_STATES=https://gaia.inegi.org.mx/wscatgeo/v2
-LOG_CHANNEL=daily
+QUEUE_CONNECTION=rabbitmq
 ```
-
-Los botones de sincronizar consultan el API de INEGI en vivo (`mgee/` para estados, `mgem/{cve_ent}` para municipios).
 
 ## Rutas
 
-### API (`/api/v1`)
-
 | Método | Ruta | Descripción |
-|--------|------|-------------|
+|---|---|---|
 | GET | `/states` | Lista de estados |
-| POST | `/states/save` | Inserta/actualiza estados (payload `states[]`) |
-| POST | `/states/sync` | Consulta estados a INEGI |
-| POST | `/states/delete/{cve_ent?}` | Soft delete de un estado |
-| GET | `/municipality/{cve_ent?}` | Lista de municipios (opcional filtrar por estado) |
-| POST | `/municipality/save` | Inserta/actualiza municipios (payload `municipalities[]`) |
-| POST | `/municipality/sync/{key_state?}` | Consulta municipios de un estado a INEGI |
-| POST | `/municipality/delete/{cve_ent?}` | Soft delete de municipios de un estado |
+| POST | `/states/save` | Inserta/actualiza estados |
+| POST | `/states/sync` | Sincroniza desde INEGI |
+| POST | `/states/delete/{cve_ent?}` | Soft delete |
+| GET | `/municipality/{cve_ent?}` | Lista de municipios |
+| POST | `/municipality/save` | Inserta/actualiza municipios |
+| POST | `/municipality/sync/{key_state?}` | Sincroniza municipios |
+| POST | `/municipality/delete/{cve_ent?}` | Soft delete |
 
-### Web
+Vistas web: `/states` y `/states/show/{id?}`.
 
-| Ruta | Descripción |
-|------|-------------|
-| `/states` | Vista de estados (DataTables + sync + confirmación) |
-| `/states/show/{id?}` | Vista de municipios por estado |
+## Docker (local)
+
+```bash
+docker compose up -d --build app     # http://localhost:8879
+docker compose logs -f app
+```
+
+Usa el MySQL de Homebrew vía `host.docker.internal:3306`. El servicio `listener` está comentado en `docker-compose.yml`.
+
+## Build y push a ECR
+
+Variables (una sola vez):
+
+```bash
+cp vars.example vars    # ajustar y luego:
+source vars
+```
+
+```bash
+aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
+
+docker buildx build --platform "$PLATFORM" \
+  -t "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPO:$IMAGE_TAG" \
+  -t "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPO:latest" \
+  --push .
+```
+
+Desplegar en ECS (opcional):
+
+```bash
+aws ecs update-service --cluster "$ECS_CLUSTER" --service "$ECS_SERVICE" \
+  --force-new-deployment --region "$REGION"
+```
+
+`vars` está en `.gitignore`. El `Dockerfile` actual compila xdebug e instala dev-dependencies; para producción pendiente: `composer install --no-dev` y xdebug fuera de la imagen.

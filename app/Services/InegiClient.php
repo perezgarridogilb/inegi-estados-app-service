@@ -14,7 +14,7 @@ class InegiClient
     }
 
     /**
-     * getStates function
+     * getStates
      *
      * Gets the states of Mexico from the INEGI service.
      *
